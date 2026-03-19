@@ -10,7 +10,13 @@ repositories {
     mavenCentral()
 }
 
+// https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+val mockitoAgent = configurations.create("mockitoAgent")
+
 dependencies {
+//    implementation(libs.bundles.kmqtt)
+//    implementation(libs.bundles.ktoml)
+
     implementation("io.github.davidepianca98:kmqtt-common-jvm:1.0.0")
     implementation("io.github.davidepianca98:kmqtt-client-jvm:1.0.0")
     implementation("com.akuleshov7:ktoml-core:0.7.1")
@@ -25,9 +31,20 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
-    testImplementation(platform("org.junit:junit-bom:6.0.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation(platform("org.junit:junit-bom:6.0.0-M1"))
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testImplementation("org.mockito:mockito-core:5.23.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
+
+    testImplementation("org.assertj:assertj-core:4.0.0-M1")
+
+    // testCompileOnly(libs.mockito.inline)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junit.jupiter)
+    mockitoAgent(libs.mockito.core) { isTransitive = false }
+
 }
 
 kotlin {
@@ -35,5 +52,6 @@ kotlin {
 }
 
 tasks.test {
+    jvmArgs("-javaagent:${mockitoAgent.asPath}")
     useJUnitPlatform()
 }

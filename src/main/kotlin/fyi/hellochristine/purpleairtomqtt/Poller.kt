@@ -2,51 +2,93 @@ package fyi.hellochristine.purpleairtomqtt
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import fyi.hellochristine.purpleairtomqtt.sensor.Sensor
 import io.github.davidepianca98.MQTTClient
 import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.subjects.AsyncSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
+import io.reactivex.rxjava3.subjects.SingleSubject
+import io.reactivex.rxjava3.subjects.Subject
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @Singleton
 class Poller @Inject constructor(
     private val lifecycle: Lifecycle,
-    private val scheduler: Scheduler,
     private val devices: List<Device>,
     private val mqttClients: Map<String, MQTTClient>,
-    private val logger: KLogger,
-    private val config: Config,
     private val deviceHttpClient: DeviceHttpClient,
 ) {
+    private val logger = KotlinLogging.logger { }
 
     fun start() {
-        logger.info { "Starting device polling" }
-        devices.forEach { scheduleDevice(it) }
+        devices.forEach { device -> scheduleDevice(device) }
     }
 
     private fun scheduleDevice(d: Device) {
-        val single = Single.just(d)
-            .subscribeOn(scheduler)
+        logger.info { "Polling device '${d.describe()}' every ${d.pollRate}"}
 
-        single
-            .map { queryDevice(d) }
-            .doOnError { throwable -> logger.error(throwable) { "Error querying device '${d.describe()}" }  }
-            .toCompletionStage()
+        val flow = Flowable.fromObservable(deviceHttpClient.query(d), BackpressureStrategy.BUFFER)
+            .onErrorComplete { throwable ->
+                logError(throwable, d)
+                true // prevent publishing errors
+            }
+            .share()
 
-        single
+        val first = flow.firstElement()
+        first.subscribe(this::publishHADiscovery)
+        first.subscribe(this::publishSensorValue)
+
+        flow
             .delay(d.pollRate.toMillis(), TimeUnit.MILLISECONDS)
-            .map { queryDevice(d) }
-            .doOnError { throwable -> logger.error(throwable) { "Error querying device '${d.describe()}'" }  }
             .repeatUntil { lifecycle.isShutDown() }
-            .retryUntil { lifecycle.isShutDown() }
+            .subscribe(this::publishSensorValue)
+    }
+
+    private fun publishHADiscovery(sensor: Sensor) {
+        logger.debug { "Publishing HA discovery details for device '${sensor.device.describe()}'" }
+
+        this
+            .onEachMQTTServer(sensor) { client ->
+
+            }
             .subscribe()
     }
 
-    private fun queryDevice(d: Device) {
-        logger.info { "Querying device ${d.id}" }
-        val sensor = deviceHttpClient.query(d)
-        println(d)
+
+
+    private fun publishSensorValue(sensor: Sensor) {
+        logger.debug { "Publishing sensor value for device '${sensor.device.describe()}'" }
+        this
+            .onEachMQTTServer(sensor) { client ->
+
+            }
+            .subscribe()
+    }
+
+    private fun onEachMQTTServer(sensor: Sensor, consumer: Consumer<MQTTClient>): Flowable<Unit> {
+        return Flowable.fromIterable(sensor.device.servers)
+            .map { server ->
+                val client = requireNotNull(mqttClients[server.clientId]) { "MQTT client '${server.clientId}' was not created" }
+                consumer.accept(client)
+            }
+            .onErrorComplete{ throwable ->
+                logError(throwable, sensor.device)
+                true // prevent publishing errors
+            }
+    }
+
+    private fun logError(throwable: Throwable, device: Device) {
+        logger.atError {
+            message = "Error querying device '${device.describe()}'"
+            cause = throwable
+        }
     }
 }

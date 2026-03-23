@@ -3,6 +3,15 @@ package fyi.hellochristine.purpleairtomqtt.homeassistant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+
+enum class SensorId(
+    val mqttId: String,
+    val description: String,
+) {
+    TEMPERATURE(mqttId = "temperature", description = "Temperature"),
+    HUMIDITY(mqttId = "humidity", description = "Humidity"),
+}
+
 @Serializable
 enum class DeviceClass {
     @SerialName("temperature") TEMPERATURE,
@@ -25,11 +34,36 @@ enum class UnitOfMeasurement {
     @SerialName("mbar") MBAR,
 }
 
-data class Sensor<T: Any>(
-    val key: String,
-    val name: String,
-    val deviceClass: DeviceClass?,
-    val unitOfMeasurement: UnitOfMeasurement,
-    val value: T,
-    val enabledByDefault: Boolean = true,
+@Serializable
+enum class StateClass {
+    @SerialName("measurement") MEASUREMENT,
+}
+
+@Serializable
+data class Sensor(
+    @SerialName("name") val name: String,
+    @SerialName("device_cla") val deviceClass: DeviceClass?,
+    @SerialName("unit_of_meas") val unitOfMeasurement: UnitOfMeasurement,
+    @SerialName("stat_cla") val statClass: StateClass?,
+    @SerialName("stat_t") val stateTopic: String,
+    @SerialName("avty_t") val availabilityTopic: String,
+    @SerialName("uniq_id") val uniqueId: String,
+    @SerialName("dev") val device: SensorDevice,
+)
+
+@Serializable
+data class SensorDevice(
+    @SerialName("ids") val ids: List<String>,
+    @SerialName("name") val name: String,
+    @SerialName("mdl") val model: String,
+    @SerialName("configuration_url") val configurationUrl: String,
+    @SerialName("sw_version") val softwareVersion: String,
+    @SerialName("connections") val connections: List<List<String>>,
+)
+
+data class SensorWithValue(
+    val id: SensorId,
+    val value: Any,
+    val sensor: Sensor,
+
 )

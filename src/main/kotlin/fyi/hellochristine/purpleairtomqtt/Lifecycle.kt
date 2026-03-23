@@ -5,6 +5,7 @@ import com.google.inject.Inject
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -29,10 +30,11 @@ class Lifecycle(
 }
 
 class LifecycleModule : AbstractModule() {
+    private val logger = KotlinLogging.logger { }
+
     @Provides
     @Singleton
     fun provideShutdownHook(
-        logger: KLogger,
         scheduler: Scheduler,
     ): Lifecycle {
         val subject = SingleSubject.create<Boolean>()

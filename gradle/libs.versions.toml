@@ -12,7 +12,11 @@ okhttp = "5.3.2"
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 kmqtt-common-jvm = { module = "io.github.davidepianca98:kmqtt-common-jvm", version.ref = "kmqtt"}
-kmqtt-client-jvm = { module = "io.github.davidepianca98:kmqtt-common-jvm", version.ref = "kmqtt"}
+kmqtt-client-jvm = { module = "io.github.davidepianca98:kmqtt-client-jvm", version.ref = "kmqtt"}
 ktoml-core = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml"}
 ktoml-file = { module = "com.akuleshov7:ktoml-file", version.ref = "ktoml"}
 
+[bundles]
+mockito = ["mockito-core", "mockito-junit-jupiter"]
+kmqtt = ["kmqtt-common-jvm", "kmqtt-client-jvm"]
+ktoml = ["ktoml-core", "ktoml-file"]

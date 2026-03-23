@@ -2,10 +2,6 @@ package fyi.hellochristine.purpleairtomqtt
 
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
-import com.google.inject.Provides
-import com.google.inject.Singleton
-import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
 
 class AppModule: AbstractModule() {
     override fun configure() {
@@ -14,12 +10,6 @@ class AppModule: AbstractModule() {
         install(ConfigModule())
         install(MqttModule())
         install(DeviceHttpClientModule())
-    }
-
-    @Provides
-    @Singleton
-    fun provideLogger(): KLogger {
-        return KotlinLogging.logger("purpleairtomqtt")
     }
 }
 

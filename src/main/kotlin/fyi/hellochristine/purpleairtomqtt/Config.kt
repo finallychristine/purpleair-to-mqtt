@@ -18,6 +18,7 @@ clientId = "client"
 [devices.default]
 host = "http://192.168.1.142"
 servers = ["default"]
+pollRateSeconds = 5
 """.trimIndent()
 
 

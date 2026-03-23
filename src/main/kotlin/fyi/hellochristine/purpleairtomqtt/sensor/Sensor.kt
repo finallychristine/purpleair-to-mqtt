@@ -67,6 +67,7 @@ enum class ParticulateCountDiameter(
 }
 
 data class Sensor(
+    val device: Device,
     val weatherData: WeatherData?,
     val place: Place,
     val airQualityReadings: List<AirQuality>,

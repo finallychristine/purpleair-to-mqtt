@@ -1,6 +1,6 @@
 package fyi.hellochristine.purpleairtomqtt
 
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
@@ -10,6 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 class MainTest {
     @Test
     fun example() {
-        assertFalse(true)
+        assertThat(true).isFalse()
     }
 }

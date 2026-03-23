@@ -5,22 +5,27 @@ import com.google.inject.Provides
 import com.google.inject.Singleton
 import io.github.davidepianca98.MQTTClient
 import io.github.davidepianca98.mqtt.MQTTVersion
+import io.github.davidepianca98.mqtt.packets.mqttv5.ReasonCode
 import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineExceptionHandler
 
 class MqttModule: AbstractModule() {
+    private val logger = KotlinLogging.logger { }
+
     @Provides
     @Singleton
-    fun provideMqttClients(logger: KLogger, config: Config): Map<String, MQTTClient> {
-        return config.mqtt.mapValues { createClient(logger, it.key, it.value) }
+    fun provideMqttClients(config: Config): Map<String, MQTTClient> {
+        // return config.mqtt.mapValues { createClient(logger, it.key, it.value) }
+        return mapOf()
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun createClient(
-        logger: KLogger,
         id: String,
         cfg: MqttConfig,
+        lifecycle: Lifecycle,
     ): MQTTClient {
         logger.info { "Connecting to mqtt broker '$id'" }
         val mqttVersion = MQTTVersion.entries.firstOrNull { it.value == cfg.version }
@@ -41,12 +46,15 @@ class MqttModule: AbstractModule() {
             throw Exception("Error creating mqtt client '$id'", e)
         }
 
-        val onException = CoroutineExceptionHandler{ ctx, throwable -> handleException(logger, cfg, ctx, throwable) }
+        val onException = CoroutineExceptionHandler{ ctx, throwable -> handleException(cfg, ctx, throwable) }
         client.runSuspend(exceptionHandler = onException)
+
+        lifecycle.onShutdown.subscribe { client.disconnect(ReasonCode.SERVER_SHUTTING_DOWN) }
+
         return client
     }
 
-    private fun handleException(logger: KLogger, cfg: MqttConfig, coroutineContext: CoroutineContext, throwable: Throwable) {
+    private fun handleException(cfg: MqttConfig, coroutineContext: CoroutineContext, throwable: Throwable) {
         logger.error(throwable) { "Error with MQTT server" }
     }
 }

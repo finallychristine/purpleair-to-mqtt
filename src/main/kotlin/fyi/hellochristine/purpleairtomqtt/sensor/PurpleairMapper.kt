@@ -1,9 +1,11 @@
 package fyi.hellochristine.purpleairtomqtt.sensor
 
+import fyi.hellochristine.purpleairtomqtt.Device
 import fyi.hellochristine.purpleairtomqtt.purpleairapi.DeviceResponse
 
-fun apiResponseToSensor(response: DeviceResponse): Sensor {
+fun apiResponseToSensor(device: Device, response: DeviceResponse): Sensor {
     return Sensor(
+        device = device,
         weatherData = parseWeather(response),
         place = parsePlace(response.place),
         airQualityReadings = listOfNotNull(

@@ -14,7 +14,7 @@ repositories {
 val mockitoAgent = configurations.create("mockitoAgent")
 
 dependencies {
-    implementation(libs.bundles.kmqtt)
+    implementation(libs.bundles.mqtt)
     implementation(libs.bundles.ktoml)
 
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")

@@ -4,16 +4,16 @@ import com.akuleshov7.ktoml.Toml
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
-import io.github.davidepianca98.mqtt.MQTTVersion
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 
 val sampletToml = """
 [mqtt.default]
 version = 5
-host = "mqtt.waller.beartree.me"
+host = "mqtt.beartree.me"
 port = 1883
-clientId = "client"
+username = "admin"
+password = "<pass>"
 
 [devices.default]
 host = "http://192.168.1.142"
@@ -58,7 +58,3 @@ data class DeviceConfig(
     val servers: List<String>,
     val pollRateSeconds: Long = 60,
 )
-
-fun test() {
-    MQTTVersion.MQTT5
-}

@@ -44,7 +44,7 @@ data class Sensor(
     @SerialName("name") val name: String,
     @SerialName("device_cla") val deviceClass: DeviceClass?,
     @SerialName("unit_of_meas") val unitOfMeasurement: UnitOfMeasurement,
-    @SerialName("stat_cla") val statClass: StateClass?,
+    @SerialName("stat_cla") val stateClass: StateClass? = StateClass.MEASUREMENT,
     @SerialName("stat_t") val stateTopic: String,
     @SerialName("avty_t") val availabilityTopic: String,
     @SerialName("uniq_id") val uniqueId: String,
@@ -61,7 +61,7 @@ data class SensorDevice(
     @SerialName("connections") val connections: List<List<String>>,
 )
 
-data class SensorWithValue(
+data class HASensorWithValue(
     val id: SensorId,
     val value: Any,
     val sensor: Sensor,

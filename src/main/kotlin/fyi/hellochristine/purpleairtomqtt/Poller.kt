@@ -2,28 +2,23 @@ package fyi.hellochristine.purpleairtomqtt
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import com.hivemq.client.mqtt.mqtt5.Mqtt5RxClient
+import fyi.hellochristine.purpleairtomqtt.homeassistant.HASensorWithValue
+import fyi.hellochristine.purpleairtomqtt.sensor.HASensor
 import fyi.hellochristine.purpleairtomqtt.sensor.Sensor
-import io.github.davidepianca98.MQTTClient
-import io.github.oshai.kotlinlogging.KLogger
+import fyi.hellochristine.purpleairtomqtt.sensor.toHomeAssistantSensors
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.reactivex.functions.BiConsumer
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Scheduler
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.functions.Consumer
-import io.reactivex.rxjava3.subjects.AsyncSubject
-import io.reactivex.rxjava3.subjects.PublishSubject
-import io.reactivex.rxjava3.subjects.SingleSubject
-import io.reactivex.rxjava3.subjects.Subject
-import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @Singleton
 class Poller @Inject constructor(
     private val lifecycle: Lifecycle,
     private val devices: List<Device>,
-    private val mqttClients: Map<String, MQTTClient>,
+    private val mqttClients: Map<String, Mqtt5RxClient>,
     private val deviceHttpClient: DeviceHttpClient,
 ) {
     private val logger = KotlinLogging.logger { }
@@ -56,7 +51,7 @@ class Poller @Inject constructor(
         logger.debug { "Publishing HA discovery details for device '${sensor.device.describe()}'" }
 
         this
-            .onEachMQTTServer(sensor) { client ->
+            .onEachMQTTServerHAPair(sensor) { client, haSensor ->
 
             }
             .subscribe()
@@ -67,18 +62,21 @@ class Poller @Inject constructor(
     private fun publishSensorValue(sensor: Sensor) {
         logger.debug { "Publishing sensor value for device '${sensor.device.describe()}'" }
         this
-            .onEachMQTTServer(sensor) { client ->
+            .onEachMQTTServerHAPair(sensor) { client, haSensor ->
 
             }
             .subscribe()
     }
 
-    private fun onEachMQTTServer(sensor: Sensor, consumer: Consumer<MQTTClient>): Flowable<Unit> {
-        return Flowable.fromIterable(sensor.device.servers)
-            .map { server ->
-                val client = requireNotNull(mqttClients[server.clientId]) { "MQTT client '${server.clientId}' was not created" }
-                consumer.accept(client)
-            }
+    private fun onEachMQTTServerHAPair(sensor: Sensor, consumer: BiConsumer<Mqtt5RxClient, HASensorWithValue>): Flowable<Unit> {
+        val haSensors = toHomeAssistantSensors(sensor)
+        val pairs = sensor.device.servers.flatMap { mqttServer ->
+            val client = requireNotNull(mqttClients[mqttServer]) { "MQTT client '${mqttServer}' was not created" }
+            haSensors.map { haSensor -> Pair(client, haSensor) }
+        }
+
+        return Flowable.fromIterable(pairs)
+            .map { pair -> consumer.accept(pair.first, pair.second) }
             .onErrorComplete{ throwable ->
                 logError(throwable, sensor.device)
                 true // prevent publishing errors

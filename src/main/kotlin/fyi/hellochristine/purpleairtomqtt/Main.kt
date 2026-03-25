@@ -13,7 +13,10 @@ class AppModule: AbstractModule() {
     }
 }
 
+
 fun main() {
+    installRXLoggingHook()
+
     val injector = Guice.createInjector(AppModule())
     val poller = injector.getInstance(Poller::class.java)
     val lifecycle = injector.getInstance(Lifecycle::class.java)

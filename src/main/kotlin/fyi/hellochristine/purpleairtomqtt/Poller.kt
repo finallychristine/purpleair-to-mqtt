@@ -3,15 +3,19 @@ package fyi.hellochristine.purpleairtomqtt
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.hivemq.client.mqtt.mqtt5.Mqtt5RxClient
+import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish
+import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PublishResult
 import fyi.hellochristine.purpleairtomqtt.homeassistant.HASensorWithValue
-import fyi.hellochristine.purpleairtomqtt.sensor.HASensor
 import fyi.hellochristine.purpleairtomqtt.sensor.Sensor
 import fyi.hellochristine.purpleairtomqtt.sensor.toHomeAssistantSensors
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.reactivex.functions.BiConsumer
+import io.github.oshai.kotlinlogging.withLoggingContext
+import io.reactivex.Observable
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.functions.Function
+import kotlinx.serialization.json.Json
+import org.slf4j.MDC
 import java.util.concurrent.TimeUnit
 
 @Singleton
@@ -24,22 +28,33 @@ class Poller @Inject constructor(
     private val logger = KotlinLogging.logger { }
 
     fun start() {
-        devices.forEach { device -> scheduleDevice(device) }
+        devices.forEach { device ->
+            withLoggingContext("device" to device.id) {
+                scheduleDevice(device)
+            }
+        }
     }
 
     private fun scheduleDevice(d: Device) {
-        logger.info { "Polling device '${d.describe()}' every ${d.pollRate}"}
+        logger.info { "Polling device every ${d.pollRate}" }
 
         val flow = Flowable.fromObservable(deviceHttpClient.query(d), BackpressureStrategy.BUFFER)
             .onErrorComplete { throwable ->
                 logError(throwable, d)
                 true // prevent publishing errors
             }
-            .share()
+            .cache()
 
         val first = flow.firstElement()
         first.subscribe(this::publishHADiscovery)
         first.subscribe(this::publishSensorValue)
+
+        first.subscribe { sensor ->
+            lifecycle.onShutdown.subscribe {
+                logger.info { "Updating sensors as unavailable due to service shutdown" }
+                publishAvailability(sensor, false)
+            }
+        }
 
         flow
             .delay(d.pollRate.toMillis(), TimeUnit.MILLISECONDS)
@@ -48,44 +63,102 @@ class Poller @Inject constructor(
     }
 
     private fun publishHADiscovery(sensor: Sensor) {
-        logger.debug { "Publishing HA discovery details for device '${sensor.device.describe()}'" }
-
-        this
-            .onEachMQTTServerHAPair(sensor) { client, haSensor ->
-
+        this.publish(
+            sensor = sensor,
+            log = { "Publishing HA discovery details" },
+            messageProvider = { haSensor ->
+                val payload = Json.encodeToString(haSensor.sensor)
+                Mqtt5Publish.builder()
+                    .topic(haSensor.haDiscoveryTopic)
+                    .contentType("application/json")
+                    .retain(true)
+                    .payload(payload.toByteArray())
+                    .build()
             }
+        )
             .subscribe()
     }
 
 
 
-    private fun publishSensorValue(sensor: Sensor) {
-        logger.debug { "Publishing sensor value for device '${sensor.device.describe()}'" }
-        this
-            .onEachMQTTServerHAPair(sensor) { client, haSensor ->
+    private fun publishAvailability(sensor: Sensor, available: Boolean) {
+        val expiresDuration = sensor.device.pollRate.toSeconds() - 1
 
-            }
-            .subscribe()
-    }
-
-    private fun onEachMQTTServerHAPair(sensor: Sensor, consumer: BiConsumer<Mqtt5RxClient, HASensorWithValue>): Flowable<Unit> {
-        val haSensors = toHomeAssistantSensors(sensor)
-        val pairs = sensor.device.servers.flatMap { mqttServer ->
-            val client = requireNotNull(mqttClients[mqttServer]) { "MQTT client '${mqttServer}' was not created" }
-            haSensors.map { haSensor -> Pair(client, haSensor) }
+        val availableState = if(available) {
+            "online"
+        } else {
+            "offline"
         }
 
-        return Flowable.fromIterable(pairs)
-            .map { pair -> consumer.accept(pair.first, pair.second) }
+        this.publish(
+                sensor = sensor,
+                log = { "Publishing sensor availability" },
+                messageProvider = { haSensor ->
+                val msg = Mqtt5Publish.builder()
+                    .topic(haSensor.sensor.availabilityTopic)
+                    .payload(availableState.toByteArray())
+
+                if (expiresDuration > 0) {
+                    msg.messageExpiryInterval(expiresDuration)
+                }
+
+                msg.build()
+            }
+        )
+            .subscribe()
+    }
+
+    private fun publishSensorValue(sensor: Sensor) {
+        publishAvailability(sensor, true)
+
+        logger.info { "Publishing sensor values" }
+        this.publish(
+            sensor = sensor,
+            log = { "Publishing sensor values" },
+            messageProvider = { haSensor ->
+                Mqtt5Publish.builder()
+                    .topic(haSensor.sensor.stateTopic)
+                    .payload(haSensor.value.toString().toByteArray())
+                    .build()
+            }
+        )
+            .subscribe()
+    }
+
+    private fun publish(
+        sensor: Sensor,
+        log: () -> Any?,
+        messageProvider: Function<HASensorWithValue, Mqtt5Publish>,
+    ): Flowable<Mqtt5PublishResult> {
+        val haSensors = toHomeAssistantSensors(sensor)
+        val clients = sensor.device.servers.map{ mqttServer ->
+            val client = requireNotNull(mqttClients[mqttServer]) { "MQTT client '${mqttServer}' was not created" }
+            Pair(mqttServer, client)
+        }
+
+        val mqttMessages = haSensors.map { messageProvider.apply(it) }
+
+        val flow =  Flowable.fromIterable(clients)
+            .flatMap{ (id,client) ->
+                withLoggingContext("mqtt-server" to id ) {
+                    logger.info(log)
+                    client.publish(io.reactivex.Flowable.fromIterable(mqttMessages))
+                }
+            }
             .onErrorComplete{ throwable ->
-                logError(throwable, sensor.device)
+                logger.error(throwable) { "Error publishing to MQTT server" }
                 true // prevent publishing errors
             }
+            .cache()
+
+        flow.subscribe { result -> logger.trace { "MQTT publish result: ${result.publish}"}}
+
+        return flow
     }
 
     private fun logError(throwable: Throwable, device: Device) {
         logger.atError {
-            message = "Error querying device '${device.describe()}'"
+            message = "Error querying device"
             cause = throwable
         }
     }

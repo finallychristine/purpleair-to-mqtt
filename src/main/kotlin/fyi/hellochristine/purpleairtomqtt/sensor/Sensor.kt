@@ -54,7 +54,7 @@ enum class PMReadingSize(
 /** A particulate count matching [size] or *greater* */
 enum class ParticulateCountDiameter(
     val size: Micrometers,
-    val description: String = "PM" + PM_FORMAT.format(size) + " count concentration",
+    val description: String = "PM" + PM_FORMAT.format(size),
 ) {
     P0_3(0.3),
     P0_5(0.5),
@@ -63,7 +63,7 @@ enum class ParticulateCountDiameter(
     P5_0(5.0),
     P10_0(10.0);
 
-    fun key() = name.lowercase() + "_count_concentration"
+    fun key() = name.lowercase()
 }
 
 data class Sensor(
@@ -71,6 +71,7 @@ data class Sensor(
     val weatherData: WeatherData?,
     val place: Place,
     val airQualityReadings: List<AirQuality>,
+    val polledDeviceInfo: PolledDeviceInfo,
 )
 
 data class WeatherData(
@@ -88,11 +89,18 @@ data class AirQuality(
     val particulateCounts: Map<ParticulateCountDiameter,Double>,
 )
 
-/**
- * Particulate Matter reading
- */
+/** Particulate Matter reading */
 data class PMReading(
     val size: PMReadingSize,
     val methodology: PMReadingMethodology,
     val amount: Double,
+)
+
+/** Mirrors device data polled from the sensor via [fyi.hellochristine.purpleairtomqtt.purpleairapi.DeviceResponse] */
+data class PolledDeviceInfo(
+    val id: String,
+    /** Human friendly name, used in wifi network setup */
+    val friendlyId: String,
+    val softwareVersion: String,
+    val hardwareDiscovered: String,
 )

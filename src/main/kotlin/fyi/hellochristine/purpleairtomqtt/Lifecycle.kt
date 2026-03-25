@@ -7,7 +7,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.schedulers.Schedulers
-import io.reactivex.rxjava3.subjects.SingleSubject
+import kotlin.system.exitProcess
 
 class Lifecycle(
     val onShutdown: Completable,
@@ -20,6 +20,7 @@ class Lifecycle(
 
     fun waitForShutdown() {
         onShutdown.blockingAwait()
+        exitProcess(0)
     }
 
     fun isShutDown(): Boolean {
@@ -37,12 +38,13 @@ class LifecycleModule : AbstractModule() {
     ): Lifecycle {
         val completable = Completable.create { emitter ->
             Runtime.getRuntime().addShutdownHook(Thread {
+                logger.trace { "SIGTERM received, shutting down" }
                 emitter.onComplete()
             })
-        }
+        }.cache()
 
         completable.subscribe {
-            logger.info { "Shutdown signal received" }
+            logger.trace { "Shutting down Rx Schedulers" }
             Schedulers.shutdown()
         }
 

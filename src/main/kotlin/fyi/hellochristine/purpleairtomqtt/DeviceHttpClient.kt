@@ -42,9 +42,12 @@ class DeviceHttpClient @Inject constructor(
 
     fun query(d: Device): Observable<Sensor> {
         return Observable.defer {
-            logger.debug { "Querying device '${d.describe()}'" }
+            var url = "${d.host}/json?live=true"
+
+            logger.info { "Querying device" }
+            logger.debug { "Issuing HTTP request to $url" }
             val request = Request.Builder()
-                .url("${d.host}/json?live=true")
+                .url(url)
                 .build()
 
             val responseContent = httpClient.newCall(request).execute().use { response ->

@@ -3,15 +3,6 @@ package fyi.hellochristine.purpleairtomqtt.homeassistant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-
-enum class SensorId(
-    val mqttId: String,
-    val description: String,
-) {
-    TEMPERATURE(mqttId = "temperature", description = "Temperature"),
-    HUMIDITY(mqttId = "humidity", description = "Humidity"),
-}
-
 @Serializable
 enum class DeviceClass {
     @SerialName("temperature") TEMPERATURE,
@@ -20,6 +11,7 @@ enum class DeviceClass {
     @SerialName("pm1") PM1,
     @SerialName("pm25") PM25,
     @SerialName("pm10") PM10,
+    @SerialName("aqi") AQI,
 }
 
 @Serializable
@@ -41,13 +33,15 @@ enum class StateClass {
 
 @Serializable
 data class Sensor(
+    /** Human-readable name that shows up in dashboards */
     @SerialName("name") val name: String,
     @SerialName("device_cla") val deviceClass: DeviceClass?,
-    @SerialName("unit_of_meas") val unitOfMeasurement: UnitOfMeasurement,
+    @SerialName("unit_of_meas") val unitOfMeasurement: UnitOfMeasurement?,
     @SerialName("stat_cla") val stateClass: StateClass? = StateClass.MEASUREMENT,
     @SerialName("stat_t") val stateTopic: String,
     @SerialName("avty_t") val availabilityTopic: String,
     @SerialName("uniq_id") val uniqueId: String,
+    @SerialName("en") val enabledByDefault: Boolean,
     @SerialName("dev") val device: SensorDevice,
 )
 
@@ -62,8 +56,7 @@ data class SensorDevice(
 )
 
 data class HASensorWithValue(
-    val id: SensorId,
     val value: Any,
     val sensor: Sensor,
-
+    val haDiscoveryTopic: String,
 )

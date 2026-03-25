@@ -8,6 +8,7 @@ fun apiResponseToSensor(device: Device, response: DeviceResponse): Sensor {
         device = device,
         weatherData = parseWeather(response),
         place = parsePlace(response.place),
+        polledDeviceInfo = parsePolledDeviceInfo(response),
         airQualityReadings = listOfNotNull(
             parseChannel(
                 channel = Channel.A,
@@ -106,5 +107,17 @@ private fun parsePlace(place: String): Place {
 }
 
 private fun fToC(f: Int): Double {
-    return (f.toDouble() - 32) / 1.8
+    val precision = 100.0
+    val c = (f.toDouble() - 32) / 1.8
+    val cInt = (c * precision).toInt()
+    return cInt / precision
+}
+
+private fun parsePolledDeviceInfo(response: DeviceResponse): PolledDeviceInfo {
+    return PolledDeviceInfo(
+        id = response.sensorId,
+        friendlyId = response.geo,
+        softwareVersion = response.firmwareVersion,
+        hardwareDiscovered = response.hardwareDiscovered,
+    )
 }

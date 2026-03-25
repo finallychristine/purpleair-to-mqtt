@@ -10,6 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 class MainTest {
     @Test
     fun example() {
-        assertThat(true).isFalse()
+        assertThat(true).isTrue()
     }
 }

@@ -6,6 +6,7 @@ import com.google.inject.Singleton
 import java.time.Duration
 
 data class Device(
+    /** Device ID specified by the user in the configuration file */
     val id: String,
     val host: String,
     val servers: Set<String>,

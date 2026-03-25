@@ -1,10 +1,18 @@
 plugins {
+    java
+    application
     kotlin("jvm") version "2.3.0"
     kotlin("plugin.serialization") version "2.3.0"
 }
 
 group = "fyi.hellochristine.purpleairtomqtt"
 version = "1.0-SNAPSHOT"
+
+application {
+    mainClass = "fyi.hellochristine.purpleairtomqtt.MainKt"
+    applicationDefaultJvmArgs = listOf("-Dname=purpleair-to-mqtt")
+}
+
 
 repositories {
     mavenCentral()
@@ -20,7 +28,10 @@ dependencies {
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")
     implementation("com.google.inject:guice:7.0.0")
     implementation("io.reactivex.rxjava3:rxjava:3.1.12")
-    implementation("org.slf4j:slf4j-simple:2.0.17")
+
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    implementation("ch.qos.logback:logback-classic:1.5.32")
+
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
 

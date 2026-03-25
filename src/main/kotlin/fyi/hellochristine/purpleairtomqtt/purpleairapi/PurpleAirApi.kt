@@ -25,6 +25,8 @@ data class DeviceResponse(
     @SerialName("place") val place: String,
     /** A label indicating all hardware the device board can see. This includes things such as the laser counters and BME environmental sensor */
     @SerialName("hardwarediscovered") val hardwareDiscovered: String,
+    /** The firmware version in use by the device */
+    @SerialName("version") val firmwareVersion: String,
 
     ///// BME
 

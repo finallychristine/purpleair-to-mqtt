@@ -12,6 +12,7 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
 import com.hivemq.client.mqtt.mqtt5.Mqtt5RxClient
 import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.withLoggingContext
 
 class MqttModule: AbstractModule() {
 
@@ -30,24 +31,27 @@ class MQTTClientProvider @Inject constructor(
     private val logger = KotlinLogging.logger { }
 
     override fun get(): Map<String, Mqtt5RxClient> {
-        return config.mqtt.mapValues { createClient(it.key, it.value, lifecycle) }
+        return config.mqtt.mapValues {
+            withLoggingContext("mqtt-server" to it.key) {
+                createClient(it.key, it.value, lifecycle)
+            }
+        }
     }
-
 
     private fun createClient(
         id: String,
         cfg: MqttConfig,
         lifecycle: Lifecycle,
     ): Mqtt5RxClient {
-        logger.info { "Connecting to mqtt broker '$id'" }
+        logger.info { "Connecting to mqtt broker" }
         check(cfg.version == 5) { "Only MQTT Version 5 is supported at this time" }
 
         val clientConfig = Mqtt5Client.builder()
             .serverHost(cfg.host)
             .serverPort(cfg.port)
-            .identifier("purpleairtomqtt")
-            .addConnectedListener { logger.info { "Connected to mqtt broker $id" } }
-            .addDisconnectedListener { logger.info { "Disconnected from mqtt broker $id" } }
+            .identifier("purpleairtomqtt-${id}")
+            .addConnectedListener { logger.info { "Connected to broker" } }
+            .addDisconnectedListener { logger.info { "Disconnected from broker" } }
             // .automaticReconnect(reconnect)
 
 
@@ -71,13 +75,14 @@ class MQTTClientProvider @Inject constructor(
                 { throwable -> handleException(throwable, cfg) }
             )
 
-        lifecycle.onShutdown.andThen{ client.disconnect() }.subscribe()
+        lifecycle.onShutdown.andThen{
+            logger.info { "Disconnecting from MQTT broker" }
+            client.disconnect().subscribe()
+        }.subscribe()
         return client
     }
 
     private fun handleException(throwable: Throwable, cfg: MqttConfig, ) {
-        logger.error(throwable) { "Error with MQTT server" }
+        logger.error(throwable) { "Error with MQTT broker" }
     }
-
-
 }

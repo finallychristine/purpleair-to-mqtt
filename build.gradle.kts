@@ -1,12 +1,12 @@
 plugins {
     java
     application
-    kotlin("jvm") version "2.3.0"
-    kotlin("plugin.serialization") version "2.3.0"
+    kotlin("jvm") version "2.3.20"
+    kotlin("plugin.serialization") version "2.3.20"
 }
 
 group = "fyi.hellochristine.purpleairtomqtt"
-version = "1.0-SNAPSHOT"
+version = file("VERSION").readText().trim()
 
 application {
     mainClass = "fyi.hellochristine.purpleairtomqtt.MainKt"

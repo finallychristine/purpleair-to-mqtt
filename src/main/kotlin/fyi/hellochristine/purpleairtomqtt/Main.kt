@@ -3,6 +3,7 @@ package fyi.hellochristine.purpleairtomqtt
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.core.main
+import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
@@ -32,7 +33,15 @@ class PurpleAirToMqtt: CliktCommand() {
         context { autoEnvvarPrefix = "PURPLEAIRTOMQTT" }
     }
 
-    val configFile by option("--config-file", envvar = "CONFIG_FIle", help = "Path to config file").file().required()
+    val configFile by
+        option("--config-file",
+            envvar = "CONFIG_FIle",
+            help = "Path to config file",
+        ).file(
+            mustExist = true,
+            mustBeReadable = true,
+            canBeDir = false,
+        ).defaultLazy { File("/app/config.toml") }
 
     override fun run() {
         installRXLoggingHook()

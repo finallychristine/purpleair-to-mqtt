@@ -1,15 +1,15 @@
-ARG APP_VERSION=1.0-SNAPSHOT
-
 FROM gradle:9.4.1-jdk25 AS build
-ARG APP_VERSION
 
 WORKDIR /home
 COPY --chown=gradle:gradle . .
 RUN gradle distTar --parallel
-RUN cd build/distributions && mkdir app && tar -xvf purpleair-to-mqtt-$APP_VERSION.tar
+RUN export APP_VERSION="$(cat VERSION)" && \
+    cd build/distributions &&  \
+    tar -xvf purpleair-to-mqtt-${APP_VERSION}.tar && \
+    mv purpleair-to-mqtt-${APP_VERSION} app
 
 FROM eclipse-temurin:25
 WORKDIR /app
-COPY --from=build /home/build/distributions/purpleair-to-mqtt-1.0-SNAPSHOT /app
-RUN echo "$APP_VERSION" > VERSION
+COPY --from=build /home/build/distributions/app /app
+COPY --from=build /home/VERSION /app
 ENTRYPOINT ["/app/bin/purpleair-to-mqtt"]

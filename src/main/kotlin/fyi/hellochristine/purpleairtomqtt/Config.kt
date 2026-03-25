@@ -1,26 +1,12 @@
 package fyi.hellochristine.purpleairtomqtt
 
 import com.akuleshov7.ktoml.Toml
+import com.akuleshov7.ktoml.source.decodeFromStream
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
-
-val sampletToml = """
-[mqtt.default]
-version = 5
-host = "mqtt.beartree.me"
-port = 1883
-username = "admin"
-password = "<pass>"
-
-[devices.default]
-host = "http://192.168.1.142"
-servers = ["default"]
-pollRateSeconds = 15
-""".trimIndent()
-
 
 class ConfigModule : AbstractModule() {
     @Provides
@@ -31,8 +17,8 @@ class ConfigModule : AbstractModule() {
 
     @Provides
     @Singleton
-    fun provideConfig(): Config {
-        return Toml().decodeFromString<Config>(sampletToml)
+    fun provideConfig(cliOptions: CLIOptions): Config {
+        return Toml().decodeFromStream<Config>(cliOptions.configFile.inputStream())
     }
 }
 

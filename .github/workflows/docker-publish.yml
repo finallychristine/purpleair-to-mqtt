@@ -18,7 +18,7 @@ jobs:
       output: image
       push: ${{ github.event_name != 'pull_request' }}
       platforms: linux/amd64,linux/arm64
-      meta-images: name/app
+      meta-images: ${{ github.repository }}
       meta-tags: |
         type=semver,pattern={{version}}
         type=semver,pattern={{major}}.{{minor}}

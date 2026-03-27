@@ -14,7 +14,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
     permissions:
@@ -22,7 +22,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v6
-    - name: Set up JDK 17
+    - name: Set up JDK
       uses: actions/setup-java@v5
       with:
         java-version: '25'
@@ -35,6 +35,9 @@ jobs:
 
     - name: Build with Gradle Wrapper
       run: ./gradlew build
+
+    - name: Gradle Test
+      run: ./gradlew test
 
   dependency-submission:
 

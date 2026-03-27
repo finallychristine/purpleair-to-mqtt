@@ -35,7 +35,7 @@ class PurpleAirToMqtt: CliktCommand() {
 
     val configFile by
         option("--config-file",
-            envvar = "CONFIG_FIle",
+            envvar = "CONFIG_FIlE",
             help = "Path to config file",
         ).file(
             mustExist = true,

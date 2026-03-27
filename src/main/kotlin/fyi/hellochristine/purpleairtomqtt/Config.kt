@@ -7,6 +7,7 @@ import com.google.inject.Provides
 import com.google.inject.Singleton
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
+import java.io.File
 
 class ConfigModule : AbstractModule() {
     @Provides
@@ -35,7 +36,7 @@ data class MqttConfig(
     val port: Int,
     val clientId: String = "purpleair-to-mqtt",
     val username: String? = null,
-    val password: String? = null,
+    val password: Secret? = null,
 )
 
 @Serializable
@@ -44,3 +45,22 @@ data class DeviceConfig(
     val servers: List<String>,
     val pollRateSeconds: Long = 60,
 )
+
+@Serializable
+data class Secret(
+    val value: String? = null,
+    val file: String? = null,
+    val dockerSecret: String? = null,
+) {
+    fun getContent(): String? {
+        return if (value != null) {
+            value
+        } else if (file != null) {
+            File(file).readText().trim()
+        } else if (dockerSecret != null) {
+            File("/run/secrets/$dockerSecret").readText().trim()
+        } else {
+            null
+        }
+    }
+}

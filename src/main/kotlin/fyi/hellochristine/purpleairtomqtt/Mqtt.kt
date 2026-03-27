@@ -59,9 +59,11 @@ class MQTTClientProvider @Inject constructor(
                 val auth = Mqtt5SimpleAuth.builder()
                     .username(cfg.username)
 
-                if (cfg.password != null) {
-                    auth.password(cfg.password.toByteArray())
+                val password = cfg.password?.getContent()
+                if (password != null) {
+                    auth.password(password.toByteArray())
                 }
+
                 clientConfig.simpleAuth(auth.build())
             }
 

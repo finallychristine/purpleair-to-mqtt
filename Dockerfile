@@ -8,7 +8,7 @@ RUN export APP_VERSION="$(cat VERSION)" && \
     tar -xvf purpleair-to-mqtt-${APP_VERSION}.tar && \
     mv purpleair-to-mqtt-${APP_VERSION} app
 
-FROM eclipse-temurin:25
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 COPY --from=build /home/build/distributions/app /app
 COPY --from=build /home/VERSION /app

@@ -22,8 +22,9 @@ repositories {
 val mockitoAgent = configurations.create("mockitoAgent")
 
 dependencies {
-    implementation(libs.bundles.mqtt)
-    implementation(libs.bundles.ktoml)
+    implementation("com.hivemq:hivemq-mqtt-client:1.3.13")
+    implementation("com.akuleshov7:ktoml-core:0.7.1")
+    implementation("com.akuleshov7:ktoml-file:0.7.1")
 
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")
     implementation("com.google.inject:guice:7.0.0")
@@ -48,13 +49,11 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:6.1.0-M1"))
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("org.mockito:mockito-core:5.23.0")
+    val mockito = testImplementation("org.mockito:mockito-core:5.23.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
     testImplementation("org.assertj:assertj-core:4.0.0-M1")
 
-    testImplementation(libs.bundles.mockito)
-    mockitoAgent(libs.mockito.core) { isTransitive = false }
-
+    mockitoAgent(mockito.toString()) { isTransitive = false }
 }
 
 kotlin {

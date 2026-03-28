@@ -12,7 +12,7 @@ data class Sensor(
     val device: Device,
     val weatherData: WeatherData?,
     val place: Place,
-    val airQualityReadings: List<AirQuality>,
+    val airQualityReadings: Set<AirQuality>,
     val polledDeviceInfo: PolledDeviceInfo,
 )
 
@@ -84,7 +84,7 @@ data class AirQuality(
     val channel: Channel,
     /** US EPA PM2.5 AQI */
     val pm25Aqi: Int,
-    val pmReadings: List<PMReading>,
+    val pmReadings: Set<PMReading>,
     val particulateCounts: Map<ParticulateCountDiameter,Double>,
 )
 
@@ -97,6 +97,7 @@ data class PMReading(
 
 /** Mirrors device data polled from the sensor via [fyi.hellochristine.purpleairtomqtt.purpleairapi.DeviceResponse] */
 data class PolledDeviceInfo(
+    /** Sensor ID / mac address returned by the purpleair API */
     val id: String,
     /** Human-friendly name, used in Wi-Fi network setup */
     val friendlyId: String,

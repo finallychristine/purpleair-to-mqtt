@@ -28,7 +28,7 @@ class PurpleAirApi @Inject constructor(
                 JsonDecoder.decodeFromString<DeviceResponse>(body.string())
             }
 
-            val sensor = apiResponseToSensor(d, responseContent)
+            val sensor = Mapper.apiResponseToSensor(d, responseContent)
             Observable.just(sensor)
         }
     }

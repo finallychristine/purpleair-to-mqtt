@@ -10,7 +10,7 @@ data class Device(
     /** Device ID specified by the user in the configuration file */
     val id: String,
     val host: String,
-    val servers: Set<String>,
+    val brokerIds: Set<String>,
     val pollRate: Duration,
 ) {
     fun describe() = id

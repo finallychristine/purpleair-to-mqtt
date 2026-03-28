@@ -6,9 +6,9 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5RxClient
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PublishResult
 import fyi.hellochristine.purpleairtomqtt.app.Lifecycle
+import fyi.hellochristine.purpleairtomqtt.homeassistant.Mapper
 import fyi.hellochristine.purpleairtomqtt.homeassistant.SensorWithValue
 import fyi.hellochristine.purpleairtomqtt.model.Sensor
-import fyi.hellochristine.purpleairtomqtt.homeassistant.toHomeAssistantSensors
 import fyi.hellochristine.purpleairtomqtt.model.Device
 import fyi.hellochristine.purpleairtomqtt.purpleairapi.PurpleAirApi
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -130,8 +130,8 @@ class Poller @Inject constructor(
         log: () -> Any?,
         messageProvider: Function<SensorWithValue, Mqtt5Publish>,
     ): Flowable<Mqtt5PublishResult> {
-        val haSensors = toHomeAssistantSensors(sensor)
-        val clients = sensor.device.servers.map{ mqttServer ->
+        val haSensors = Mapper.toHomeAssistantSensors(sensor)
+        val clients = sensor.device.brokerIds.map{ mqttServer ->
             val client = requireNotNull(mqttClients[mqttServer]) { "MQTT client '${mqttServer}' was not created" }
             Pair(mqttServer, client)
         }

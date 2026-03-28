@@ -23,7 +23,7 @@ class DevicesModule: AbstractModule() {
         return Device(
             id = id,
             host = cfg.host,
-            servers = cfg.servers.toSet(),
+            brokerIds = cfg.servers.toSet(),
             pollRate = Duration.ofSeconds(cfg.pollRateSeconds),
         )
     }

@@ -1,19 +1,12 @@
-package fyi.hellochristine.purpleairtomqtt
+package fyi.hellochristine.purpleairtomqtt.app
 
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import fyi.hellochristine.purpleairtomqtt.config.Config
+import fyi.hellochristine.purpleairtomqtt.config.DeviceConfig
+import fyi.hellochristine.purpleairtomqtt.model.Device
 import java.time.Duration
-
-data class Device(
-    /** Device ID specified by the user in the configuration file */
-    val id: String,
-    val host: String,
-    val servers: Set<String>,
-    val pollRate: Duration,
-) {
-    fun describe() = id
-}
 
 class DevicesModule: AbstractModule() {
     @Provides

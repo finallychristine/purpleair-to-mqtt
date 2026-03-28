@@ -5,17 +5,18 @@ import com.google.inject.Singleton
 import com.hivemq.client.mqtt.mqtt5.Mqtt5RxClient
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PublishResult
-import fyi.hellochristine.purpleairtomqtt.homeassistant.HASensorWithValue
-import fyi.hellochristine.purpleairtomqtt.sensor.Sensor
-import fyi.hellochristine.purpleairtomqtt.sensor.toHomeAssistantSensors
+import fyi.hellochristine.purpleairtomqtt.app.Lifecycle
+import fyi.hellochristine.purpleairtomqtt.homeassistant.SensorWithValue
+import fyi.hellochristine.purpleairtomqtt.model.Sensor
+import fyi.hellochristine.purpleairtomqtt.homeassistant.toHomeAssistantSensors
+import fyi.hellochristine.purpleairtomqtt.model.Device
+import fyi.hellochristine.purpleairtomqtt.purpleairapi.PurpleAirApi
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.oshai.kotlinlogging.withLoggingContext
-import io.reactivex.Observable
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.functions.Function
 import kotlinx.serialization.json.Json
-import org.slf4j.MDC
 import java.util.concurrent.TimeUnit
 
 @Singleton
@@ -23,7 +24,7 @@ class Poller @Inject constructor(
     private val lifecycle: Lifecycle,
     private val devices: List<Device>,
     private val mqttClients: Map<String, Mqtt5RxClient>,
-    private val deviceHttpClient: DeviceHttpClient,
+    private val purpleAirApi: PurpleAirApi,
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -38,9 +39,9 @@ class Poller @Inject constructor(
     private fun scheduleDevice(d: Device) {
         logger.info { "Polling device every ${d.pollRate}" }
 
-        val flow = Flowable.fromObservable(deviceHttpClient.query(d), BackpressureStrategy.BUFFER)
+        val flow = Flowable.fromObservable(purpleAirApi.query(d), BackpressureStrategy.BUFFER)
             .onErrorComplete { throwable ->
-                logError(throwable, d)
+                logger.error(throwable) { "Error querying device" }
                 true // prevent publishing errors
             }
             .cache()
@@ -111,7 +112,6 @@ class Poller @Inject constructor(
     private fun publishSensorValue(sensor: Sensor) {
         publishAvailability(sensor, true)
 
-        logger.info { "Publishing sensor values" }
         this.publish(
             sensor = sensor,
             log = { "Publishing sensor values" },
@@ -128,7 +128,7 @@ class Poller @Inject constructor(
     private fun publish(
         sensor: Sensor,
         log: () -> Any?,
-        messageProvider: Function<HASensorWithValue, Mqtt5Publish>,
+        messageProvider: Function<SensorWithValue, Mqtt5Publish>,
     ): Flowable<Mqtt5PublishResult> {
         val haSensors = toHomeAssistantSensors(sensor)
         val clients = sensor.device.servers.map{ mqttServer ->
@@ -154,12 +154,5 @@ class Poller @Inject constructor(
         flow.subscribe { result -> logger.trace { "MQTT publish result: ${result.publish}"}}
 
         return flow
-    }
-
-    private fun logError(throwable: Throwable, device: Device) {
-        logger.atError {
-            message = "Error querying device"
-            cause = throwable
-        }
     }
 }

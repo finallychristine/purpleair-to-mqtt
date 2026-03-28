@@ -1,30 +1,18 @@
-package fyi.hellochristine.purpleairtomqtt
+package fyi.hellochristine.purpleairtomqtt.mqtt
 
-import com.google.inject.AbstractModule
 import com.google.inject.Inject
 import com.google.inject.Provider
-import com.google.inject.Provides
-import com.google.inject.Singleton
-import com.google.inject.TypeLiteral
-import com.google.inject.multibindings.MapBinder
-import com.hivemq.client.mqtt.lifecycle.MqttClientAutoReconnect
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
 import com.hivemq.client.mqtt.mqtt5.Mqtt5RxClient
 import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth
+import fyi.hellochristine.purpleairtomqtt.app.Lifecycle
+import fyi.hellochristine.purpleairtomqtt.config.Config
+import fyi.hellochristine.purpleairtomqtt.config.MqttConfig
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.oshai.kotlinlogging.withLoggingContext
+import kotlin.text.toByteArray
 
-class MqttModule: AbstractModule() {
-
-    // Sadly need a type literal here cuz we want Guice to explicitly
-    // reference Mqtt5RxClient interface versus the concrete implementation
-    override fun configure() {
-        bind(object : TypeLiteral<Map<String, Mqtt5RxClient>>(){})
-            .toProvider(MQTTClientProvider::class.java)
-    }
-}
-
-class MQTTClientProvider @Inject constructor(
+class MqttClientProvider @Inject constructor(
     private val config: Config,
     private val lifecycle: Lifecycle,
 ): Provider<Map<String, Mqtt5RxClient>> {
@@ -52,39 +40,35 @@ class MQTTClientProvider @Inject constructor(
             .identifier("purpleairtomqtt-${id}")
             .addConnectedListener { logger.info { "Connected to broker" } }
             .addDisconnectedListener { logger.info { "Disconnected from broker" } }
-            // .automaticReconnect(reconnect)
 
 
-            if (cfg.username != null) {
-                val auth = Mqtt5SimpleAuth.builder()
-                    .username(cfg.username)
+        if (cfg.username != null) {
+            val auth = Mqtt5SimpleAuth.builder()
+                .username(cfg.username)
 
-                val password = cfg.password?.getContent()
-                if (password != null) {
-                    auth.password(password.toByteArray())
-                }
-
-                clientConfig.simpleAuth(auth.build())
+            val password = cfg.password?.getContent()
+            if (password != null) {
+                auth.password(password.toByteArray())
             }
 
+            clientConfig.simpleAuth(auth.build())
+        }
 
         val client = clientConfig.buildRx()
-
 
         client.connect()
             .subscribe(
                 {},
-                { throwable -> handleException(throwable, cfg) }
+                { throwable ->
+                    logger.error(throwable) { "Error connecting to MQTT broker" }
+                }
             )
 
         lifecycle.onShutdown.andThen{
             logger.info { "Disconnecting from MQTT broker" }
             client.disconnect().subscribe()
         }.subscribe()
-        return client
-    }
 
-    private fun handleException(throwable: Throwable, cfg: MqttConfig, ) {
-        logger.error(throwable) { "Error with MQTT broker" }
+        return client
     }
 }

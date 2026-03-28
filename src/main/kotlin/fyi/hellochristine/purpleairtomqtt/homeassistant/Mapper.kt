@@ -1,10 +1,6 @@
-package fyi.hellochristine.purpleairtomqtt.sensor
+package fyi.hellochristine.purpleairtomqtt.homeassistant
 
-import fyi.hellochristine.purpleairtomqtt.homeassistant.*
-
-typealias HASensor = fyi.hellochristine.purpleairtomqtt.homeassistant.Sensor
-
-fun toHomeAssistantSensors(sensor: Sensor): List<HASensorWithValue> {
+fun toHomeAssistantSensors(sensor: fyi.hellochristine.purpleairtomqtt.model.Sensor): List<SensorWithValue> {
     val temp = sensor.weatherData?.let {
         getSensorWithValue(
             sensor = sensor,
@@ -79,7 +75,6 @@ fun toHomeAssistantSensors(sensor: Sensor): List<HASensorWithValue> {
     val pmReadings = airReading?.pmReadings
         ?.filter { it.methodology == sensor.place.methodology }
         ?.map { reading ->
-            reading
             getSensorWithValue(
                 sensor = sensor,
                 id = reading.size.key(),
@@ -97,16 +92,16 @@ private fun getSensorWithValue(
     id: String,
     name: String,
     value: Any,
-    sensor: Sensor,
+    sensor: fyi.hellochristine.purpleairtomqtt.model.Sensor,
     deviceClass: DeviceClass?,
     unitOfMeasurement: UnitOfMeasurement?,
     stateClass: StateClass? = StateClass.MEASUREMENT,
     enabledByDefault: Boolean = true,
-): HASensorWithValue {
-    return HASensorWithValue(
+): SensorWithValue {
+    return SensorWithValue(
         value = value,
         haDiscoveryTopic = getDiscoveryTopic(sensor, id),
-        sensor = HASensor(
+        sensor = Sensor(
             name = name,
             deviceClass = deviceClass,
             unitOfMeasurement = unitOfMeasurement,
@@ -115,7 +110,7 @@ private fun getSensorWithValue(
             availabilityTopic = getAvailabilityTopic(sensor, id),
             uniqueId = id,
             enabledByDefault = enabledByDefault,
-            device = SensorDevice(
+            device = Device(
                 ids = listOf(
                     "purpleair-to-mqtt--${sensor.device.id}",
                     sensor.polledDeviceInfo.id,
@@ -133,21 +128,21 @@ private fun getSensorWithValue(
 }
 
 fun getAvailabilityTopic(
-    sensor: Sensor,
+    sensor: fyi.hellochristine.purpleairtomqtt.model.Sensor,
     id: String,
 ): String {
     return "purpleairtomqtt/${sensor.device.id}/${id}/status"
 }
 
 fun getStateTopic(
-    sensor: Sensor,
+    sensor: fyi.hellochristine.purpleairtomqtt.model.Sensor,
     id: String,
 ): String {
     return "purpleairtomqtt/${sensor.device.id}/${id}/state"
 }
 
 fun getDiscoveryTopic(
-    sensor: Sensor,
+    sensor: fyi.hellochristine.purpleairtomqtt.model.Sensor,
     id: String,
 ): String {
     return "homeassistant/sensor/purpleairtomqtt-${sensor.device.id}-${id}/config"

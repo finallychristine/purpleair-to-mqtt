@@ -1,12 +1,12 @@
-package fyi.hellochristine.purpleairtomqtt
+package fyi.hellochristine.purpleairtomqtt.config
 
 import com.akuleshov7.ktoml.Toml
 import com.akuleshov7.ktoml.source.decodeFromStream
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
+import fyi.hellochristine.purpleairtomqtt.CLIOptions
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import java.io.File
 
 class ConfigModule : AbstractModule() {

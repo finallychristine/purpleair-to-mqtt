@@ -42,11 +42,12 @@ data class Sensor(
     @SerialName("avty_t") val availabilityTopic: String,
     @SerialName("uniq_id") val uniqueId: String,
     @SerialName("en") val enabledByDefault: Boolean,
-    @SerialName("dev") val device: SensorDevice,
+    @SerialName("dev") val device: Device,
 )
 
 @Serializable
-data class SensorDevice(
+data class Device(
+    /** List of identifiers for this device, shows up in HA */
     @SerialName("ids") val ids: List<String>,
     @SerialName("name") val name: String,
     @SerialName("mdl") val model: String,
@@ -55,7 +56,7 @@ data class SensorDevice(
     @SerialName("connections") val connections: List<List<String>>,
 )
 
-data class HASensorWithValue(
+data class SensorWithValue(
     val value: Any,
     val sensor: Sensor,
     val haDiscoveryTopic: String,

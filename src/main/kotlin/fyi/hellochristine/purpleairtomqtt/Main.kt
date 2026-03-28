@@ -5,24 +5,13 @@ import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
-import com.google.inject.AbstractModule
 import com.google.inject.Guice
+import fyi.hellochristine.purpleairtomqtt.app.AppModule
+import fyi.hellochristine.purpleairtomqtt.app.Lifecycle
+import fyi.hellochristine.purpleairtomqtt.app.Logging
 import java.io.File
 
-class AppModule(
-    private val cliOptions: CLIOptions
-): AbstractModule() {
-    override fun configure() {
-        bind(CLIOptions::class.java).toInstance(cliOptions)
-        install(LifecycleModule())
-        install(DevicesModule())
-        install(ConfigModule())
-        install(MqttModule())
-        install(DeviceHttpClientModule())
-    }
-}
 
 data class CLIOptions(
     val configFile: File,
@@ -44,7 +33,7 @@ class PurpleAirToMqtt: CliktCommand() {
         ).defaultLazy { File("/app/config.toml") }
 
     override fun run() {
-        installRXLoggingHook()
+        Logging.installRXLoggingHook()
 
         val cliOptions = CLIOptions(configFile = configFile)
         val injector = Guice.createInjector(AppModule(cliOptions))

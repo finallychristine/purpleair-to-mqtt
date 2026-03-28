@@ -1,6 +1,5 @@
-package fyi.hellochristine.purpleairtomqtt.sensor
+package fyi.hellochristine.purpleairtomqtt.model
 
-import fyi.hellochristine.purpleairtomqtt.Device
 import fyi.hellochristine.purpleairtomqtt.homeassistant.DeviceClass
 import java.text.DecimalFormat
 
@@ -8,6 +7,14 @@ typealias CelciusDegrees = Double
 typealias Micrometers = Double
 
 private val PM_FORMAT = DecimalFormat("##.#")
+
+data class Sensor(
+    val device: Device,
+    val weatherData: WeatherData?,
+    val place: Place,
+    val airQualityReadings: List<AirQuality>,
+    val polledDeviceInfo: PolledDeviceInfo,
+)
 
 @Target(AnnotationTarget.FIELD)
 annotation class RequiredHardware(val hardware: Hardware)
@@ -66,14 +73,6 @@ enum class ParticulateCountDiameter(
     fun key() = name.lowercase()
 }
 
-data class Sensor(
-    val device: Device,
-    val weatherData: WeatherData?,
-    val place: Place,
-    val airQualityReadings: List<AirQuality>,
-    val polledDeviceInfo: PolledDeviceInfo,
-)
-
 data class WeatherData(
     val temperature: CelciusDegrees,
     val dewpoint: CelciusDegrees,
@@ -99,7 +98,7 @@ data class PMReading(
 /** Mirrors device data polled from the sensor via [fyi.hellochristine.purpleairtomqtt.purpleairapi.DeviceResponse] */
 data class PolledDeviceInfo(
     val id: String,
-    /** Human friendly name, used in wifi network setup */
+    /** Human-friendly name, used in Wi-Fi network setup */
     val friendlyId: String,
     val softwareVersion: String,
     val hardwareDiscovered: String,

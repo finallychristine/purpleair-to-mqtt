@@ -37,7 +37,7 @@ data class Sensor(
     @SerialName("name") val name: String,
     @SerialName("device_cla") val deviceClass: DeviceClass?,
     @SerialName("unit_of_meas") val unitOfMeasurement: UnitOfMeasurement?,
-    @SerialName("stat_cla") val stateClass: StateClass? = StateClass.MEASUREMENT,
+    @SerialName("stat_cla") val stateClass: StateClass?,
     @SerialName("stat_t") val stateTopic: String,
     @SerialName("avty_t") val availabilityTopic: String,
     @SerialName("uniq_id") val uniqueId: String,

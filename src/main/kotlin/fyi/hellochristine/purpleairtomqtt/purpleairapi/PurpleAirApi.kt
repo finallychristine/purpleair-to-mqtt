@@ -1,6 +1,6 @@
 package fyi.hellochristine.purpleairtomqtt.purpleairapi
 
-import com.google.inject.Inject
+import javax.inject.Inject
 import fyi.hellochristine.purpleairtomqtt.model.Device
 import fyi.hellochristine.purpleairtomqtt.model.Sensor
 import io.github.oshai.kotlinlogging.KotlinLogging

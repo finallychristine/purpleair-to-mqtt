@@ -1,15 +1,13 @@
 package fyi.hellochristine.purpleairtomqtt
 
-import com.google.inject.Inject
-import com.google.inject.Singleton
-import com.hivemq.client.mqtt.mqtt5.Mqtt5RxClient
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PublishResult
 import fyi.hellochristine.purpleairtomqtt.app.Lifecycle
 import fyi.hellochristine.purpleairtomqtt.homeassistant.Mapper
 import fyi.hellochristine.purpleairtomqtt.homeassistant.SensorWithValue
-import fyi.hellochristine.purpleairtomqtt.model.Sensor
 import fyi.hellochristine.purpleairtomqtt.model.Device
+import fyi.hellochristine.purpleairtomqtt.model.Sensor
+import fyi.hellochristine.purpleairtomqtt.mqtt.MqttClients
 import fyi.hellochristine.purpleairtomqtt.purpleairapi.PurpleAirApi
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.oshai.kotlinlogging.withLoggingContext
@@ -18,12 +16,14 @@ import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.functions.Function
 import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class Poller @Inject constructor(
     private val lifecycle: Lifecycle,
     private val devices: List<Device>,
-    private val mqttClients: Map<String, Mqtt5RxClient>,
+    private val mqttClients: MqttClients,
     private val purpleAirApi: PurpleAirApi,
 ) {
     private val logger = KotlinLogging.logger { }
@@ -132,7 +132,7 @@ class Poller @Inject constructor(
     ): Flowable<Mqtt5PublishResult> {
         val haSensors = Mapper.toHomeAssistantSensors(sensor)
         val clients = sensor.device.brokerIds.map{ mqttServer ->
-            val client = requireNotNull(mqttClients[mqttServer]) { "MQTT client '${mqttServer}' was not created" }
+            val client = requireNotNull(mqttClients.map[mqttServer]) { "MQTT client '${mqttServer}' was not created" }
             Pair(mqttServer, client)
         }
 

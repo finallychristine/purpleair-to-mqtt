@@ -1,14 +1,15 @@
 package fyi.hellochristine.purpleairtomqtt.app
 
-import com.google.inject.AbstractModule
-import com.google.inject.Provides
-import com.google.inject.Singleton
+import dagger.Module
+import dagger.Provides
 import fyi.hellochristine.purpleairtomqtt.config.Config
 import fyi.hellochristine.purpleairtomqtt.config.DeviceConfig
 import fyi.hellochristine.purpleairtomqtt.model.Device
 import java.time.Duration
+import javax.inject.Singleton
 
-class DevicesModule: AbstractModule() {
+@Module
+class DevicesModule {
     @Provides
     @Singleton
     fun provideDevices(config: Config): List<Device> {

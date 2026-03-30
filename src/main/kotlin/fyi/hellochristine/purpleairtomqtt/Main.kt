@@ -6,9 +6,8 @@ import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
-import com.google.inject.Guice
-import fyi.hellochristine.purpleairtomqtt.app.AppModule
-import fyi.hellochristine.purpleairtomqtt.app.Lifecycle
+import fyi.hellochristine.purpleairtomqtt.app.AppComponent
+import fyi.hellochristine.purpleairtomqtt.app.DaggerAppComponent
 import fyi.hellochristine.purpleairtomqtt.app.Logging
 import java.io.File
 
@@ -36,9 +35,9 @@ class PurpleAirToMqtt: CliktCommand() {
         Logging.installRXLoggingHook()
 
         val cliOptions = CLIOptions(configFile = configFile)
-        val injector = Guice.createInjector(AppModule(cliOptions))
-        val poller = injector.getInstance(Poller::class.java)
-        val lifecycle = injector.getInstance(Lifecycle::class.java)
+        val appComponent = DaggerAppComponent.factory().create(cliOptions = cliOptions)
+        val lifecycle = appComponent.getLifecycle()
+        val poller = appComponent.getPoller()
         poller.start()
         lifecycle.waitForShutdown()
     }

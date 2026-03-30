@@ -1,13 +1,14 @@
 package fyi.hellochristine.purpleairtomqtt.app
 
-import com.google.inject.AbstractModule
-import com.google.inject.Provides
-import com.google.inject.Singleton
+import dagger.Module
+import dagger.Provides
+import javax.inject.Singleton
 import io.github.oshai.kotlinlogging.KotlinLogging
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 
-class OkHttpClientModule: AbstractModule() {
+@Module
+class OkHttpClientModule {
     private val logger = KotlinLogging.logger { }
 
     @Provides

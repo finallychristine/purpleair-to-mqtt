@@ -45,5 +45,5 @@ services:
 ## Behind the Scenes
 This is an *Enterprise Ready™* Kotlin service with tooling like:
 
-* [Guice](https://github.com/google/guice)
+* [Dagger](https://dagger.dev/)
 * [RxJava](https://github.com/reactivex/rxjava)

@@ -3,6 +3,7 @@ plugins {
     application
     kotlin("jvm") version "2.3.0"
     kotlin("plugin.serialization") version "2.3.0"
+    id("com.google.devtools.ksp") version "2.3.6"
 }
 
 group = "fyi.hellochristine.purpleairtomqtt"
@@ -27,7 +28,8 @@ dependencies {
     implementation("com.akuleshov7:ktoml-file:0.7.1")
 
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")
-    implementation("com.google.inject:guice:7.0.0")
+    implementation("com.google.dagger:dagger:2.59.2")
+    ksp("com.google.dagger:dagger-compiler:2.59.2")
     implementation("io.reactivex.rxjava3:rxjava:3.1.12")
 
     implementation("org.slf4j:slf4j-api:2.0.17")
@@ -35,9 +37,6 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
-
-    // transitive dependency has security vulnerabilities
-    implementation("com.google.guava:guava:33.5.0-jre")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.10.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")

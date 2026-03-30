@@ -1,13 +1,14 @@
 package fyi.hellochristine.purpleairtomqtt.app
 
-import com.google.inject.AbstractModule
-import com.google.inject.Provides
-import com.google.inject.Singleton
+import dagger.Module
+import dagger.Provides
+import javax.inject.Singleton
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.schedulers.Schedulers
 
-class LifecycleModule : AbstractModule() {
+@Module
+class LifecycleModule {
     private val logger = KotlinLogging.logger { }
 
     @Provides

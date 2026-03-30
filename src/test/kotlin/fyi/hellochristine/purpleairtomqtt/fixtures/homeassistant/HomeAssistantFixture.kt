@@ -6,6 +6,7 @@ import fyi.hellochristine.purpleairtomqtt.homeassistant.Device
 import fyi.hellochristine.purpleairtomqtt.homeassistant.DeviceClass
 import fyi.hellochristine.purpleairtomqtt.homeassistant.Sensor
 import fyi.hellochristine.purpleairtomqtt.homeassistant.SensorWithValue
+import fyi.hellochristine.purpleairtomqtt.homeassistant.StateClass
 import fyi.hellochristine.purpleairtomqtt.homeassistant.UnitOfMeasurement
 
 object HomeAssistantFixture {
@@ -31,6 +32,7 @@ object HomeAssistantFixture {
             uniqueId = sensorId,
             enabledByDefault = enabledByDefault,
             device = device,
+            stateClass = StateClass.MEASUREMENT,
         )
     }
 

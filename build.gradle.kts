@@ -53,6 +53,13 @@ dependencies {
     testImplementation("org.assertj:assertj-core:4.0.0-M1")
 
     mockitoAgent(mockito.toString()) { isTransitive = false }
+
+    testImplementation("org.testcontainers:testcontainers:2.0.4")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.4")
+    testImplementation("org.testcontainers:testcontainers-hivemq:2.0.4")
+    testImplementation("org.testcontainers:testcontainers-mockserver:2.0.4")
+    testImplementation("org.antlr:ST4:4.3.4")
+    testImplementation("org.mock-server:mockserver-client-java:5.15.0")
 }
 
 kotlin {

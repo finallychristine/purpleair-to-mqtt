@@ -14,18 +14,18 @@ class LifecycleModule {
     @Provides
     @Singleton
     fun provideShutdownHook(): Lifecycle {
-        val completable = Completable.create { emitter ->
-            Runtime.getRuntime().addShutdownHook(Thread {
-                logger.trace { "SIGTERM received, shutting down" }
-                emitter.onComplete()
-            })
-        }.cache()
+        val lifecycle = Lifecycle()
 
-        completable.subscribe {
+        Runtime.getRuntime().addShutdownHook(Thread {
+            logger.trace { "SIGTERM received, shutting down" }
+            lifecycle.shutdown()
+        })
+
+        lifecycle.onShutdown.subscribe {
             logger.trace { "Shutting down Rx Schedulers" }
             Schedulers.shutdown()
         }
 
-        return Lifecycle(completable)
+        return lifecycle
     }
 }

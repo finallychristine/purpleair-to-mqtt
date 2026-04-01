@@ -9,6 +9,7 @@ import com.github.ajalt.clikt.parameters.types.file
 import fyi.hellochristine.purpleairtomqtt.app.AppComponent
 import fyi.hellochristine.purpleairtomqtt.app.DaggerAppComponent
 import fyi.hellochristine.purpleairtomqtt.app.Logging
+import org.jetbrains.annotations.VisibleForTesting
 import java.io.File
 
 
@@ -31,14 +32,19 @@ class PurpleAirToMqtt: CliktCommand() {
             canBeDir = false,
         ).defaultLazy { File("/app/config.toml") }
 
-    override fun run() {
-        Logging.installRXLoggingHook()
+    companion object {
+        @VisibleForTesting
+        fun setup(cliOptions: CLIOptions): AppComponent {
+            Logging.installRXLoggingHook()
+            return DaggerAppComponent.factory().create(cliOptions = cliOptions)
+        }
+    }
 
+    override fun run() {
         val cliOptions = CLIOptions(configFile = configFile)
-        val appComponent = DaggerAppComponent.factory().create(cliOptions = cliOptions)
+        val appComponent = setup(cliOptions)
+        appComponent.getPoller().start()
         val lifecycle = appComponent.getLifecycle()
-        val poller = appComponent.getPoller()
-        poller.start()
         lifecycle.waitForShutdown()
     }
 }

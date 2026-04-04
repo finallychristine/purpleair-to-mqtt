@@ -47,3 +47,10 @@ This is an *Enterprise Ready™* Kotlin service with tooling like:
 
 * [Dagger](https://dagger.dev/)
 * [RxJava](https://github.com/reactivex/rxjava)
+
+This project is used to help me to learn about AI tools:
+
+* [Claude Code](https://claude) — extremely helpful to learn how RXJava works, GitHub actions, unit tests and more!
+* [Claude Code Reviews](./.github/workflows/claude-code-review.yml)
+* [JetBrains AI Chat + Claude](https://www.jetbrains.com/help/ai-assistant/ai-chat.html)
+  — Claue Code integration with JetBrains

@@ -28,6 +28,7 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.mockserver.MockServerContainer
 import org.testcontainers.utility.DockerImageName
+import org.testcontainers.utility.MountableFile
 import java.io.File
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -42,6 +43,15 @@ class IntegrationTest {
     @Container
     val mqttBroker = HiveMQContainer(DockerImageName.parse("hivemq/hivemq-ce").withTag("2025.5"))
         .withLogLevel(Level.INFO)
+        .withHiveMQConfig(MountableFile.forClasspathResource("integration/hivemq-server.xml"))
+        .withFileInHomeFolder(
+            MountableFile.forClasspathResource("ssl/server-keystore.p12"),
+            "/conf/server-keystore.p12"
+        )
+        .withFileInHomeFolder(
+            MountableFile.forClasspathResource("ssl/client-truststore.p12"),
+            "/conf/client-truststore.p12"
+        )
 
     @Container
     val mockServer = MockServerContainer(DockerImageName.parse("mockserver/mockserver").withTag("5.15.0"))

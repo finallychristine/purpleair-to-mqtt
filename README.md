@@ -11,7 +11,8 @@ First define a configuration file (e.g. `config.toml)
 [mqtt.default]
 version = 5
 host = "example.host"
-port = 1883
+ssl.enabled = true # optional, defaults to true
+port = 1883 # optional, defaults to 1833, or 8883 if ssl
 username = "username" # optional
 # optional, specify a password directly
 password.content = "password"
@@ -19,6 +20,19 @@ password.content = "password"
 password.file = "/var/run/secrets/mqtt-password"
 # optional, reference a docker secret stored as a file
 password.dockerSecret = "mqtt-password"
+
+# Optional ssl options
+ssl.skipHostnameVerification = false # optional, defaults to false
+ssl.allowInvalidCertificates = false # optional, defaults to false
+ssl.protocols = ["TLSv1.2", "TLSv1.3"] # optional, defaults to system defaults
+
+# Optional keystore for 2-way SSL authentication
+ssl.keystore.path = "/var/run/secrets/keystore.p12" # also supports .dockerSecret variant
+ssl.keystore.password.file = "/var/run/secrets/keystore-password" # also supports .content and .dockerSecret variants
+
+# Optional truststore to limit which SSL certificates are trusted
+ssl.truststore.path = "/var/run/secrets/truststore.p12" # also supports .dockerSecret variant
+ssl.truststore.password.file = "/var/run/secrets/truststore-password" # also supports .content and .dockerSecret variants
 
 [devices.default]
 host = "http://192.168.1.142"

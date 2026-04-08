@@ -4,6 +4,7 @@ host = "<mqtt_host>"
 port = <mqtt_port>
 clientId = "client"
 
+
 [devices.default]
 host = "http://<http_host>:<http_port>"
 servers = ["default"]

@@ -8,6 +8,7 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5RxClient
 import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth
 import dagger.Module
 import dagger.Provides
+import fyi.hellochristine.purpleairtomqtt.Util
 import fyi.hellochristine.purpleairtomqtt.app.Lifecycle
 import fyi.hellochristine.purpleairtomqtt.config.Config
 import fyi.hellochristine.purpleairtomqtt.config.MqttConfig
@@ -75,19 +76,17 @@ class MqttModule {
             }
 
             if (cfg.ssl.keystore != null) {
-                val keystoreFile = cfg.ssl.keystore.getFile()
-                val password = cfg.ssl.keystore.password?.getContent()?.toCharArray()
-                val keystore = KeyStore.getInstance(keystoreFile, password)
-                val keyManagerFactory = KeyManagerUtils.createKeyManagerFactory(KeyManagerUtils.createKeyManager(KeyStoreHolder(keystore, password)))
-                sslConfig.keyManagerFactory(keyManagerFactory)
+                sslConfig.keyManagerFactory(Util.keyManagerFactory(
+                    keystoreFile = cfg.ssl.keystore.getFile(),
+                    password = cfg.ssl.keystore.password?.getContent(),
+                ))
             }
 
             if (cfg.ssl.truststore != null) {
-                val trustStoreFile = cfg.ssl.truststore.getFile()
-                val password = cfg.ssl.truststore.password?.getContent()?.toCharArray()
-                val keystore = KeyStore.getInstance(trustStoreFile, password)
-                val trustManagerFactory = TrustManagerUtils.createTrustManagerFactory(TrustManagerUtils.createTrustManager(keystore))
-                sslConfig.trustManagerFactory(trustManagerFactory)
+                sslConfig.trustManagerFactory(Util.trustManagerFactory(
+                    trustStoreFile = cfg.ssl.truststore.getFile(),
+                    password = cfg.ssl.truststore.password?.getContent(),
+                ))
             }
 
             if (cfg.ssl.allowInvalidCertificates) {

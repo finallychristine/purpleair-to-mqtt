@@ -4,20 +4,19 @@ import com.hivemq.client.mqtt.MqttClientSslConfig
 import com.hivemq.client.mqtt.MqttGlobalPublishFilter
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
+import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish
 import com.hivemq.client.mqtt.mqtt5.message.subscribe.Mqtt5Subscribe
 import fyi.hellochristine.purpleairtomqtt.CLIOptions
 import fyi.hellochristine.purpleairtomqtt.PurpleAirToMqtt
+import fyi.hellochristine.purpleairtomqtt.Util
 import fyi.hellochristine.purpleairtomqtt.app.AppComponent
 import fyi.hellochristine.purpleairtomqtt.homeassistant.DeviceClass
 import fyi.hellochristine.purpleairtomqtt.homeassistant.Sensor
 import kotlinx.serialization.json.Json
+import nl.altindag.ssl.util.HostnameVerifierUtils
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
@@ -43,15 +42,15 @@ class IntegrationTest {
     // https://java.testcontainers.org/modules/hivemq
     @Container
     val mqttBroker = HiveMQContainer(DockerImageName.parse("hivemq/hivemq-ce").withTag("2025.5"))
-        .withLogLevel(Level.INFO)
+        .withLogLevel(Level.DEBUG)
         .withHiveMQConfig(MountableFile.forClasspathResource("integration/hivemq-server.xml"))
         .withFileInHomeFolder(
             MountableFile.forClasspathResource("/ssl/server-keystore.p12"),
             "/conf/server-keystore.p12"
         )
         .withFileInHomeFolder(
-            MountableFile.forClasspathResource("/ssl/client-truststore.p12"),
-            "/conf/client-truststore.p12"
+            MountableFile.forClasspathResource("/ssl/server-truststore.p12"),
+            "/conf/server-truststore.p12"
         )
 
     @Container
@@ -68,8 +67,17 @@ class IntegrationTest {
         mqttClient = Mqtt5Client.builder()
             .serverHost(mqttBroker.host)
             .serverPort(mqttBroker.mqttPort)
+            .sslConfig(MqttClientSslConfig.builder()
+                .keyManagerFactory(Util.keyManagerFactory(Util.getResourceFile("ssl/client-keystore.p12"), "password"))
+                .trustManagerFactory(Util.trustManagerFactory(Util.getResourceFile("ssl/client-truststore.p12"), "password"))
+                .hostnameVerifier(HostnameVerifierUtils.createUnsafe())
+                .build())
             .buildBlocking()
-        mqttClient.connect()
+
+        val ack = mqttClient.connect()
+        assertThat(ack.reasonCode)
+            .withRepresentation { it.toString() }
+            .isEqualTo(Mqtt5ConnAckReasonCode.SUCCESS)
     }
 
     @AfterEach
@@ -149,6 +157,9 @@ class IntegrationTest {
 
         st.add("http_port", mockServer.serverPort)
         st.add("http_host", mockServer.host)
+
+        st.add("keystore_file", this::class.java.getResource("/ssl/client-keystore.p12")!!.path)
+        st.add("truststore_file", this::class.java.getResource("/ssl/client-truststore.p12")!!.path)
 
         val configFile = createTempFile("purpleairtomqtt", "config.toml")
         configFile.writeText(st.render())

@@ -66,7 +66,7 @@ data class Secret(
     val file: String? = null,
     val dockerSecret: String? = null,
 ) {
-    fun getContent(): String? {
+    fun getContent(): String {
         return if (value != null) {
             value
         } else if (file != null) {
@@ -74,7 +74,7 @@ data class Secret(
         } else if (dockerSecret != null) {
             File("/run/secrets/$dockerSecret").readText().trim()
         } else {
-            null
+            error("Secret must have either value, file or dockerSecret")
         }
     }
 }

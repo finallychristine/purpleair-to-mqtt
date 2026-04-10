@@ -22,7 +22,7 @@ services:
 
 ## Config Setup
 
-First define a configuration file (e.g. `config.toml)
+First define a configuration file (e.g. `config.toml`)
 
 ```toml
 [mqtt.default]
@@ -31,7 +31,7 @@ host = "example.host"
 ssl.enabled = true            # optional, defaults to true
 port = 8883                   # optional, defaults to 8883 if ssl.enabled, otherwise 1833
 username = "username"         # optional
-password.content = "password" # optional
+password.value = "password"  # optional
 
 [devices.default]
 host = "http://192.168.1.142"
@@ -79,6 +79,7 @@ This is an *Enterprise Ready™* Kotlin service with tooling like:
 
 * [Dagger](https://dagger.dev/)
 * [RxJava](https://github.com/reactivex/rxjava)
+* 2-way SSL authentication support
 
 This project is used to help me to learn about AI tools:
 

@@ -1,5 +1,6 @@
 package fyi.hellochristine.purpleairtomqtt.integration
 
+import com.hivemq.client.mqtt.MqttClientSslConfig
 import com.hivemq.client.mqtt.MqttGlobalPublishFilter
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
@@ -45,11 +46,11 @@ class IntegrationTest {
         .withLogLevel(Level.INFO)
         .withHiveMQConfig(MountableFile.forClasspathResource("integration/hivemq-server.xml"))
         .withFileInHomeFolder(
-            MountableFile.forClasspathResource("ssl/server-keystore.p12"),
+            MountableFile.forClasspathResource("/ssl/server-keystore.p12"),
             "/conf/server-keystore.p12"
         )
         .withFileInHomeFolder(
-            MountableFile.forClasspathResource("ssl/client-truststore.p12"),
+            MountableFile.forClasspathResource("/ssl/client-truststore.p12"),
             "/conf/client-truststore.p12"
         )
 

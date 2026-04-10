@@ -43,6 +43,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     implementation("io.github.hakky54:ayza:10.0.4")
+    implementation("com.google.guava:guava:33.5.0-jre")
 
     implementation("com.github.ajalt.clikt:clikt:5.1.0")
 

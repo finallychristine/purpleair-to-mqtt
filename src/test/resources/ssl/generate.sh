@@ -1,6 +1,8 @@
 # https://learn.microsoft.com/en-us/azure/application-gateway/self-signed-certificates
 set -Eeuo pipefail
 
+rm *.p12
+
 # CA Key & Certificate
 echo "CA Setup"
 openssl ecparam -out root-ca.key -name prime256v1 -genkey
@@ -35,16 +37,14 @@ openssl x509 -req -in server.csr -sha256 -out server.crt -days 3000  \
 
 echo "Server Truststore"
 cat server-intermediary.crt root-ca.crt > server-chain.pem
-openssl pkcs12 -export -nokeys -in server-intermediary.crt -chain  -CAfile server-chain.pem \
-  -out server-truststore.p12 -name "server-truststore" -password pass:password
+keytool -importcert -trustcacerts -alias root-ca -file root-ca.crt \
+  -keystore server-truststore.p12 -storetype PKCS12 -storepass password -noprompt
+keytool -importcert -trustcacerts -alias client-ca -file client-intermediary.crt \
+  -keystore server-truststore.p12 -storetype PKCS12 -storepass password -noprompt
 
 echo "Server Keystore"
 openssl pkcs12 -export -in server.crt -inkey server.key -chain -CAfile server-chain.pem \
   -out server-keystore.p12 -name "server-keystore" -password pass:password
-
-# Verify
-echo "Verify Server Cert"
-openssl verify -CAfile server-chain.pem server.crt
 
 ## Client intermediary CA
 echo "Client Intermediary CA"
@@ -64,13 +64,18 @@ openssl x509 -req -in client.csr -sha256 -out client.crt -days 3000  \
 
 
 echo "Client Truststore"
+# Sadly we need to use keytool in lieu of openssl for storing CA certs
+# since this adds some Java specific goodness that openssl doesn't
 cat client-intermediary.crt root-ca.crt > client-chain.pem
-openssl pkcs12 -export -nokeys -in client-intermediary.crt -chain  -CAfile server-chain.pem \
-  -out client-truststore.p12 -name "client-truststore" -password pass:password
+keytool -importcert -trustcacerts -alias root-ca -file root-ca.crt \
+  -keystore client-truststore.p12 -storetype PKCS12 -storepass password -noprompt
+keytool -importcert -trustcacerts -alias server-ca -file server-intermediary.crt \
+  -keystore client-truststore.p12 -storetype PKCS12 -storepass password -noprompt
 
 echo "Client Keystore"
 openssl pkcs12 -export -in client.crt -inkey client.key -chain -CAfile client-chain.pem \
   -out client-keystore.p12 -name "client-keystore" -password pass:password
 
-echo "Verify Client Cert"
-openssl verify -CAfile client-chain.pem client.crt
+echo "Delete unused files"
+rm *.srl
+rm *.csr

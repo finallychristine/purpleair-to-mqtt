@@ -6,7 +6,6 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 import fyi.hellochristine.purpleairtomqtt.CLIOptions
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.io.File
 import java.io.InputStream
@@ -43,7 +42,7 @@ data class MqttConfig(
     val ssl: MqttSslOptions = MqttSslOptions(),
 )
 
-@Serializable @SerialName("ssl")
+@Serializable
 data class MqttSslOptions(
     val enabled: Boolean = true,
     val skipHostnameVerification: Boolean = false,

@@ -4,6 +4,13 @@ host = "<mqtt_host>"
 port = <mqtt_port>
 clientId = "client"
 
+ssl.skipHostnameVerification = true
+ssl.keystore.file = "<keystore_file>"
+ssl.keystore.password.value = "password"
+
+ssl.truststore.file = "<truststore_file>"
+ssl.truststore.password.value = "password"
+
 [devices.default]
 host = "http://<http_host>:<http_port>"
 servers = ["default"]

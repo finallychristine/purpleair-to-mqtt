@@ -8,6 +8,7 @@ import javax.inject.Singleton
 import fyi.hellochristine.purpleairtomqtt.CLIOptions
 import kotlinx.serialization.Serializable
 import java.io.File
+import java.io.InputStream
 
 @Module
 class ConfigModule {
@@ -34,10 +35,21 @@ data class Config(
 data class MqttConfig(
     val version: Int,
     val host: String,
-    val port: Int,
+    val port: Int? = null,
     val clientId: String = "purpleair-to-mqtt",
     val username: String? = null,
     val password: Secret? = null,
+    val ssl: MqttSslOptions = MqttSslOptions(),
+)
+
+@Serializable
+data class MqttSslOptions(
+    val enabled: Boolean = true,
+    val skipHostnameVerification: Boolean = false,
+    val allowInvalidCertificates: Boolean = false,
+    val protocols: List<String> = listOf(),
+    val keystore: KeyStore? = null,
+    val truststore: KeyStore? = null,
 )
 
 @Serializable
@@ -53,7 +65,7 @@ data class Secret(
     val file: String? = null,
     val dockerSecret: String? = null,
 ) {
-    fun getContent(): String? {
+    fun getContent(): String {
         return if (value != null) {
             value
         } else if (file != null) {
@@ -61,7 +73,24 @@ data class Secret(
         } else if (dockerSecret != null) {
             File("/run/secrets/$dockerSecret").readText().trim()
         } else {
-            null
+            error("Secret must have either value, file or dockerSecret")
+        }
+    }
+}
+
+@Serializable
+data class KeyStore(
+    val file: String? = null,
+    val dockerSecret: String? = null,
+    val password: Secret? = null,
+) {
+    fun getFile(): File {
+        return if (file != null) {
+            File(file)
+        } else if (dockerSecret != null) {
+            File("/run/secrets/$dockerSecret")
+        } else {
+            error("KeyStore must have either file or dockerSecret")
         }
     }
 }

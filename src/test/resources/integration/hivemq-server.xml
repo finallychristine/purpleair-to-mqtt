@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hivemq>
+    <listeners>
+        <tls-tcp-listener>
+            <!-- Normally we'd use port 8883 for TLS, but the test container defaults to 1883
+                and it's a lot easier to just do tls over 1883 -->
+            <port>1883</port>
+            <bind-address>0.0.0.0</bind-address>
+            <tls>
+                <keystore>
+                    <path>/opt/hivemq/conf/server-keystore.p12</path>
+                    <password>password</password>
+                    <private-key-password>password</private-key-password>
+                </keystore>
+                <truststore>
+                    <path>/opt/hivemq/conf/server-truststore.p12</path>
+                    <password>password</password>
+                </truststore>
+            </tls>
+        </tls-tcp-listener>
+    </listeners>
+</hivemq>

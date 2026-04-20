@@ -6,6 +6,7 @@ import fyi.hellochristine.purpleairtomqtt.CLIOptions
 import fyi.hellochristine.purpleairtomqtt.Poller
 import fyi.hellochristine.purpleairtomqtt.config.ConfigModule
 import fyi.hellochristine.purpleairtomqtt.mqtt.MqttModule
+import fyi.hellochristine.purpleairtomqtt.purpleairapi.PurpleAirModule
 import javax.inject.Singleton
 
 @Singleton
@@ -14,7 +15,8 @@ import javax.inject.Singleton
     LifecycleModule::class,
     ConfigModule::class,
     MqttModule::class,
-    OkHttpClientModule::class,
+    HttpClientModule::class,
+    PurpleAirModule::class,
 ])
 interface AppComponent {
     fun getPoller(): Poller

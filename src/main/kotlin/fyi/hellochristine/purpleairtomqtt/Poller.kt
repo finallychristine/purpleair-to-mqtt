@@ -8,12 +8,12 @@ import fyi.hellochristine.purpleairtomqtt.homeassistant.SensorWithValue
 import fyi.hellochristine.purpleairtomqtt.model.Device
 import fyi.hellochristine.purpleairtomqtt.model.Sensor
 import fyi.hellochristine.purpleairtomqtt.mqtt.MqttClients
-import fyi.hellochristine.purpleairtomqtt.purpleairapi.PurpleAirApi
+import fyi.hellochristine.purpleairtomqtt.purpleairapi.PurpleAirApiByDevice
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.oshai.kotlinlogging.withLoggingContext
-import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.functions.Function
+import kotlinx.coroutines.rx3.rxSingle
 import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -24,7 +24,7 @@ class Poller @Inject constructor(
     private val lifecycle: Lifecycle,
     private val devices: List<Device>,
     private val mqttClients: MqttClients,
-    private val purpleAirApi: PurpleAirApi,
+    private val purpleAirApi: PurpleAirApiByDevice,
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -39,7 +39,12 @@ class Poller @Inject constructor(
     private fun scheduleDevice(d: Device) {
         logger.info { "Polling device every ${d.pollRate}" }
 
-        val flow = Flowable.fromObservable(purpleAirApi.query(d), BackpressureStrategy.BUFFER)
+        val api = purpleAirApi[d.id]
+        checkNotNull(api) { "PurpleAir API for device '${d.id}' was not configured" }
+
+        val flow = rxSingle { api.query() }
+            .map { resp -> fyi.hellochristine.purpleairtomqtt.purpleairapi.Mapper.apiResponseToSensor(d, resp) }
+            .toFlowable()
             .onErrorComplete { throwable ->
                 logger.error(throwable) { "Error querying device" }
                 true // prevent publishing errors

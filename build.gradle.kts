@@ -34,7 +34,7 @@ dependencies {
 
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")
     implementation("com.google.dagger:dagger:2.59.2")
-    implementation("io.ktor:ktor-client-logging:3.4.2")
+    implementation("io.ktor:ktor-client-logging:3.4.3")
     ksp("com.google.dagger:dagger-compiler:2.59.2")
     implementation("io.reactivex.rxjava3:rxjava:3.1.12")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-rx3:1.10.2")
@@ -42,10 +42,10 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.17")
     implementation("ch.qos.logback:logback-classic:1.5.32")
 
-    implementation("io.ktor:ktor-client-core-jvm:3.4.2")
-    implementation("io.ktor:ktor-client-content-negotiation-jvm:3.4.2")
-    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:3.4.2")
-    implementation("io.ktor:ktor-client-logging-jvm:3.4.2")
+    implementation("io.ktor:ktor-client-core-jvm:3.4.3")
+    implementation("io.ktor:ktor-client-content-negotiation-jvm:3.4.3")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:3.4.3")
+    implementation("io.ktor:ktor-client-logging-jvm:3.4.3")
     implementation("de.jensklingenberg.ktorfit:ktorfit-lib:2.7.2")
     ksp("de.jensklingenberg.ktorfit:ktorfit-ksp:2.7.2")
 

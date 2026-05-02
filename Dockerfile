@@ -1,4 +1,4 @@
-FROM gradle:9.4.1-jdk25 AS build
+FROM gradle:9.5.0-jdk25 AS build
 
 WORKDIR /home
 COPY --chown=gradle:gradle . .

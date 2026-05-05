@@ -87,3 +87,14 @@ This project is used to help me to learn about AI tools:
 * [Claude Code Reviews](./.github/workflows/claude-code-review.yml)
 * [JetBrains AI Chat + Claude](https://www.jetbrains.com/help/ai-assistant/ai-chat.html)
   — Claue Code integration with JetBrains
+
+
+## Development
+
+This uses Gradle version fuzzy matching to support one-shot updating all dependencies.
+
+To update:
+
+```sh
+./gradlew dependencies --update-locks '*:*' --refresh-dependencies
+```

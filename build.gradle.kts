@@ -79,6 +79,14 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-mockserver:2.0.5")
     testImplementation("org.antlr:ST4:4.3.4")
     testImplementation("org.mock-server:mockserver-client-java:5.15.0")
+
+    constraints {
+        testImplementation("io.swagger.parser.v3:swagger-parser:2.1.41")
+        testImplementation("io.netty:netty-common:4.2.12.Final")
+        testImplementation("io.netty:netty-codec:4.2.12.Final")
+        testImplementation("io.netty:netty-codec-http:4.2.12.Final")
+        testImplementation("io.netty:netty-codec-http2:4.2.12.Final")
+    }
 }
 
 kotlin {

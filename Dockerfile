@@ -1,4 +1,4 @@
-FROM gradle:9.4.1-jdk25 AS build
+FROM gradle:9.5.0-jdk26 AS build
 
 WORKDIR /home
 COPY --chown=gradle:gradle . .
@@ -8,7 +8,7 @@ RUN export APP_VERSION="$(cat VERSION)" && \
     tar -xvf purpleair-to-mqtt-${APP_VERSION}.tar && \
     mv purpleair-to-mqtt-${APP_VERSION} app
 
-FROM eclipse-temurin:25-jre-alpine
+FROM eclipse-temurin:26-jre-alpine
 WORKDIR /app
 COPY --from=build /home/build/distributions/app /app
 COPY --from=build /home/VERSION /app

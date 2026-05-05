@@ -5,6 +5,7 @@ plugins {
     kotlin("plugin.serialization") version "2.3.21"
     id("com.google.devtools.ksp") version "2.3.6"
     id("de.jensklingenberg.ktorfit") version "2.7.2"
+    id("com.github.ben-manes.versions") version "0.53.0"
 }
 
 group = "fyi.hellochristine.purpleairtomqtt"
@@ -22,6 +23,10 @@ repositories {
 
 ktorfit {
     compilerPluginVersion.set("2.3.3")
+}
+
+dependencyLocking {
+    lockAllConfigurations()
 }
 
 // https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3

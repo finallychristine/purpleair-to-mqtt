@@ -1,0 +1,116 @@
+[versions]
+kotlin = "2.3.21"
+jdk = "25"
+ksp = "2.+"
+ktorfit = "2.+"
+ktorfit-compiler = "2.+"
+ktor = "3.+"
+kotlinx-coroutines = "1.+"
+kotlinx-serialization = "1.+"
+hivemq = "1.+"
+ktoml = "0.+"
+kotlin-logging = "8.+"
+dagger = "2.+"
+rxjava = "3.+"
+slf4j = "2.+"
+logback = "1.+"
+ayza = "10.+"
+guava = "33.+"
+clikt = "5.+"
+junit-jupiter = "6.+"
+junit-platform = "6.+"
+mockito = "5.+"
+assertj = "3.+"
+testcontainers = "2.+"
+st4 = "4.+"
+mockserver = "5.+"
+xmlunit = "2.+"
+bouncycastle = "1.+"
+nimbus-jose-jwt = "10.+"
+commons-beanutils = "1.+"
+swagger-parser = "2.+"
+netty = "4.+"
+json-path = "3.+"
+
+[libraries]
+# MQTT
+hivemq-mqtt-client = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq" }
+
+# TOML
+ktoml-core = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
+ktoml-file = { module = "com.akuleshov7:ktoml-file", version.ref = "ktoml" }
+
+# Logging
+kotlin-logging = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlin-logging" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+# DI
+dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }
+dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }
+
+# Ktor / Ktorfit
+ktor-client-core = { module = "io.ktor:ktor-client-core-jvm", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation-jvm", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktor" }
+ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
+ktorfit-lib = { module = "de.jensklingenberg.ktorfit:ktorfit-lib", version.ref = "ktorfit" }
+ktorfit-ksp = { module = "de.jensklingenberg.ktorfit:ktorfit-ksp", version.ref = "ktorfit" }
+
+# Kotlin / KotlinX
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-rx3 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-rx3", version.ref = "kotlinx-coroutines" }
+
+# Reactive
+rxjava = { module = "io.reactivex.rxjava3:rxjava", version.ref = "rxjava" }
+
+# Utilities
+ayza = { module = "io.github.hakky54:ayza", version.ref = "ayza" } # SSL cert helpers
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
+
+# Testing
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter", version.ref = "testcontainers" }
+testcontainers-hivemq = { module = "org.testcontainers:testcontainers-hivemq", version.ref = "testcontainers" }
+testcontainers-mockserver = { module = "org.testcontainers:testcontainers-mockserver", version.ref = "testcontainers" }
+st4 = { module = "org.antlr:ST4", version.ref = "st4" }
+mockserver-client = { module = "org.mock-server:mockserver-client-java", version.ref = "mockserver" }
+
+# Test dependency constraints (transitive vuln fixes)
+xmlunit-core = { module = "org.xmlunit:xmlunit-core", version.ref = "xmlunit" }
+bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
+nimbus-jose-jwt = { module = "com.nimbusds:nimbus-jose-jwt", version.ref = "nimbus-jose-jwt" }
+commons-beanutils = { module = "commons-beanutils:commons-beanutils", version.ref = "commons-beanutils" }
+swagger-parser = { module = "io.swagger.parser.v3:swagger-parser", version.ref = "swagger-parser" }
+netty-common = { module = "io.netty:netty-common", version.ref = "netty" }
+netty-codec = { module = "io.netty:netty-codec", version.ref = "netty" }
+netty-codec-http = { module = "io.netty:netty-codec-http", version.ref = "netty" }
+netty-codec-http2 = { module = "io.netty:netty-codec-http2", version.ref = "netty" }
+json-path = { module = "com.jayway.jsonpath:json-path", version.ref = "json-path" }
+
+[bundles]
+ktoml = ["ktoml-core", "ktoml-file"]
+logging = ["kotlin-logging", "slf4j-api", "logback-classic"]
+ktor = ["ktor-client-core", "ktor-client-content-negotiation", "ktor-client-logging", "ktor-serialization-json", "ktorfit-lib"]
+kotlinx-serialization = ["kotlinx-serialization-core", "kotlinx-serialization-json"]
+kotlinx-coroutines = ["kotlinx-coroutines-core", "kotlinx-coroutines-rx3"]
+mockito = ["mockito-core", "mockito-junit-jupiter"]
+testcontainers = ["testcontainers", "testcontainers-junit-jupiter", "testcontainers-hivemq", "testcontainers-mockserver"]
+vulns-transitive-testcontainers = ["xmlunit-core", "bouncycastle-prov", "bouncycastle-pkix", "nimbus-jose-jwt",
+    "commons-beanutils", "swagger-parser", "netty-common", "netty-codec", "netty-codec-http", "netty-codec-http2",
+    "json-path"]
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }

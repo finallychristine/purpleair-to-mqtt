@@ -20,6 +20,7 @@ jobs:
     permissions:
       contents: read
     steps:
+    - uses: actions/checkout@v6
     - uses: ./.github/actions/setup-gradle
     - name: Build with Gradle Wrapper
       run: ./gradlew build
@@ -31,6 +32,7 @@ jobs:
     permissions:
       contents: write
     steps:
+    - uses: actions/checkout@v6
     - uses: ./.github/actions/setup-gradle
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@v6

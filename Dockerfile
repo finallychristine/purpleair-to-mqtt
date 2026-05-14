@@ -1,8 +1,15 @@
-FROM gradle:9.5.0-jdk26 AS build
+FROM eclipse-temurin:26-jdk-alpine AS gradle
 
 WORKDIR /home
 COPY --chown=gradle:gradle . .
-RUN gradle distTar --parallel
+
+# Pre-download dependencies (cached unless build files change)
+RUN --mount=type=cache,target=/root/.gradle \
+    ./gradlew dependencies --no-daemon || true \
+
+RUN --mount=type=cache,target=/root/.gradle \
+    ./gradlew distTar --parallel --no-daemon
+
 RUN export APP_VERSION="$(cat VERSION)" && \
     cd build/distributions &&  \
     tar -xvf purpleair-to-mqtt-${APP_VERSION}.tar && \
@@ -10,6 +17,6 @@ RUN export APP_VERSION="$(cat VERSION)" && \
 
 FROM eclipse-temurin:26-jre-alpine
 WORKDIR /app
-COPY --from=build /home/build/distributions/app /app
-COPY --from=build /home/VERSION /app
+COPY --from=gradle /home/build/distributions/app /app
+COPY --from=gradle /home/VERSION /app
 ENTRYPOINT ["/app/bin/purpleair-to-mqtt"]

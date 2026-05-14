@@ -21,23 +21,21 @@ jobs:
       contents: read
 
     steps:
-    - uses: actions/checkout@v6
-    - name: Set up JDK
-      uses: actions/setup-java@v5
+    - name: Checkout
+      uses: actions/checkout@v6
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Build
+      id: build
+      uses: docker/build-push-action@v6
       with:
-        java-version: '26'
-        distribution: 'temurin'
-
-    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-
-    - name: Build with Gradle Wrapper
-      run: ./gradlew build
-
-    - name: Gradle Test
-      run: ./gradlew test
+        context: .
+        push: false
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        target: gradle
+    - name: Test
+      run: docker run --rm --entrypoint ./gradlew ${{ steps.build.outputs.digest }} test
 
   dependency-submission:
 

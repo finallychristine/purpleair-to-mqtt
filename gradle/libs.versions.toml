@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.3.21"
-jdk = "26"
+jdk = "25"
 ksp = "2.+"
 ktorfit = "2.+"
 ktorfit-compiler = "2.+"

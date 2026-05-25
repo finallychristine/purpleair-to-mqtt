@@ -35,7 +35,7 @@ enum class StateClass {
 data class Sensor(
     /** Human-readable name that shows up in dashboards */
     @SerialName("name") val name: String,
-    @SerialName("device_cla") val deviceClass: DeviceClass?,
+    @SerialName("dev_cla") val deviceClass: DeviceClass?,
     @SerialName("unit_of_meas") val unitOfMeasurement: UnitOfMeasurement?,
     @SerialName("stat_cla") val stateClass: StateClass?,
     @SerialName("stat_t") val stateTopic: String,

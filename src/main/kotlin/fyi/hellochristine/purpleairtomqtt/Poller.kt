@@ -42,14 +42,16 @@ class Poller @Inject constructor(
         val api = purpleAirApi[d.id]
         checkNotNull(api) { "PurpleAir API for device '${d.id}' was not configured" }
 
-        val flow = rxSingle { api.query() }
+        val flow = rxSingle {
+            logger.debug { "Querying PurpleAir API" }
+            api.query()
+        }
             .map { resp -> fyi.hellochristine.purpleairtomqtt.purpleairapi.Mapper.apiResponseToSensor(d, resp) }
             .toFlowable()
             .onErrorComplete { throwable ->
                 logger.error(throwable) { "Error querying device" }
                 true // prevent publishing errors
             }
-            .cache()
 
         val first = flow.firstElement()
         first.subscribe(this::publishHADiscovery)
@@ -146,7 +148,7 @@ class Poller @Inject constructor(
         val flow =  Flowable.fromIterable(clients)
             .flatMap{ (id,client) ->
                 withLoggingContext("mqtt-server" to id, "device" to sensor.device.id ) {
-                    logger.info(log)
+                    logger.debug(log)
                     client.publish(io.reactivex.Flowable.fromIterable(mqttMessages))
                 }
             }
@@ -159,8 +161,6 @@ class Poller @Inject constructor(
         flow.subscribe { result ->
             if (result.error.isPresent) {
                 logger.error(result.error.get()) { "MQTT publish Error"}
-            } else {
-                logger.info { "MQTT publish result: ${result.publish}" }
             }
         }
 

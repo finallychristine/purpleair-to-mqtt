@@ -98,7 +98,7 @@ class Poller @Inject constructor(
 
         this.publish(
                 sensor = sensor,
-                log = { "Publishing sensor availability" },
+                log = { "Publishing sensor availability as '$availableState'" },
                 messageProvider = { haSensor ->
                 val msg = Mqtt5Publish.builder()
                     .topic(haSensor.sensor.availabilityTopic)
@@ -145,7 +145,7 @@ class Poller @Inject constructor(
 
         val flow =  Flowable.fromIterable(clients)
             .flatMap{ (id,client) ->
-                withLoggingContext("mqtt-server" to id ) {
+                withLoggingContext("mqtt-server" to id, "device" to sensor.device.id ) {
                     logger.info(log)
                     client.publish(io.reactivex.Flowable.fromIterable(mqttMessages))
                 }
@@ -156,7 +156,13 @@ class Poller @Inject constructor(
             }
             .cache()
 
-        flow.subscribe { result -> logger.trace { "MQTT publish result: ${result.publish}"}}
+        flow.subscribe { result ->
+            if (result.error.isPresent) {
+                logger.error(result.error.get()) { "MQTT publish Error"}
+            } else {
+                logger.info { "MQTT publish result: ${result.publish}" }
+            }
+        }
 
         return flow
     }

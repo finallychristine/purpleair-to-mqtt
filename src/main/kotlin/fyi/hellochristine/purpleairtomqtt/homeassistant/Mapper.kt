@@ -109,7 +109,7 @@ object Mapper {
                 stateClass = stateClass,
                 stateTopic = getStateTopic(sensor, id),
                 availabilityTopic = getAvailabilityTopic(sensor, id),
-                uniqueId = id,
+                uniqueId = "purpleair_${name}_${id}",
                 enabledByDefault = enabledByDefault,
                 device = Device(
                     ids = listOf(

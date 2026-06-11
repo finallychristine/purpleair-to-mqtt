@@ -1,8 +1,8 @@
 package fyi.hellochristine.purpleairtomqtt.purpleairapi
 
-import fyi.hellochristine.purpleairtomqtt.model.Device
 import fyi.hellochristine.purpleairtomqtt.model.AirQuality
 import fyi.hellochristine.purpleairtomqtt.model.Channel
+import fyi.hellochristine.purpleairtomqtt.model.Device
 import fyi.hellochristine.purpleairtomqtt.model.PMReading
 import fyi.hellochristine.purpleairtomqtt.model.PMReadingMethodology
 import fyi.hellochristine.purpleairtomqtt.model.PMReadingSize
@@ -19,6 +19,7 @@ object Mapper {
             weatherData = parseWeather(response),
             place = parsePlace(response.place),
             polledDeviceInfo = parsePolledDeviceInfo(response),
+            vocReading = response.gas_680,
             airQualityReadings = setOfNotNull(
                 parseChannel(
                     channel = Channel.A,

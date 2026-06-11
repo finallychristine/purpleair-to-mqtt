@@ -46,6 +46,17 @@ object Mapper {
             )
         }
 
+        val voc = sensor.vocReading?.let {
+            getSensorWithValue(
+                sensor = sensor,
+                id = "tvoc",
+                name = "TVOC",
+                value = sensor.vocReading,
+                deviceClass = DeviceClass.VOC_PARTS,
+                unitOfMeasurement = UnitOfMeasurement.PPB,
+            )
+        }
+
 
         // Note: could be nice to distinguish between sensor A & B
         val airReading = sensor.airQualityReadings.firstOrNull()
@@ -86,7 +97,7 @@ object Mapper {
                 )
             } ?: emptyList()
 
-        return listOfNotNull(temp, humidity, pressure, dewpoint, aqi) + counts + pmReadings
+        return listOfNotNull(temp, humidity, pressure, dewpoint, aqi, voc) + counts + pmReadings
     }
 
     private fun getSensorWithValue(

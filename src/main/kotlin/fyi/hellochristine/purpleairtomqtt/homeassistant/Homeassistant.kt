@@ -12,6 +12,7 @@ enum class DeviceClass {
     @SerialName("pm25") PM25,
     @SerialName("pm10") PM10,
     @SerialName("aqi") AQI,
+    @SerialName("volatile_organic_compounds_parts") VOC_PARTS,
 }
 
 @Serializable
@@ -24,6 +25,7 @@ enum class UnitOfMeasurement {
     /** Micrograms per cubic meter of air. Measurement of mass */
     @SerialName("μg/m³") UG_M3,
     @SerialName("mbar") MBAR,
+    @SerialName("ppb") PPB,
 }
 
 @Serializable

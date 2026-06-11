@@ -13,6 +13,7 @@ data class Sensor(
     val weatherData: WeatherData?,
     val place: Place,
     val airQualityReadings: Set<AirQuality>,
+    val vocReading: Double?,
     val polledDeviceInfo: PolledDeviceInfo,
 )
 

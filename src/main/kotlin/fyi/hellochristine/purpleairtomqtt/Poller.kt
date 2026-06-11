@@ -44,9 +44,13 @@ class Poller @Inject constructor(
 
         val flow = rxSingle {
             logger.debug { "Querying PurpleAir API" }
-            api.query()
+            val res = api.query()
+            res
         }
-            .map { resp -> fyi.hellochristine.purpleairtomqtt.purpleairapi.Mapper.apiResponseToSensor(d, resp) }
+            .map { resp ->
+                val res = fyi.hellochristine.purpleairtomqtt.purpleairapi.Mapper.apiResponseToSensor(d, resp)
+                res
+            }
             .toFlowable()
             .onErrorComplete { throwable ->
                 logger.error(throwable) { "Error querying device" }

@@ -2,9 +2,18 @@ package fyi.hellochristine.purpleairtomqtt.purpleairapi
 
 import fyi.hellochristine.purpleairtomqtt.model.Hardware
 import fyi.hellochristine.purpleairtomqtt.model.RequiredHardware
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.doubleOrNull
 
 val JsonDecoder = Json {
     ignoreUnknownKeys = true
@@ -111,4 +120,32 @@ data class DeviceResponse(
     @RequiredHardware(Hardware.PMSX003_B) val pm10_0_atm_b: Double? = null,
     /** Channel B 10.0-micrometer particle counts per deciliter of air */
     @RequiredHardware(Hardware.PMSX003_B) val p_10_0_um_b: Double? = null,
+    @RequiredHardware(Hardware.BME68X)
+    @Serializable(with = DropNotNumberSerializer::class)
+    val gas_680: Double? = null,
 )
+
+class DropNotNumberSerializer  : KSerializer<Double?> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("DropNotNumberSerializer", PrimitiveKind.DOUBLE);
+
+    override fun deserialize(decoder: Decoder): Double? {
+        val jsonDecoder = decoder as JsonDecoder
+        val element = jsonDecoder.decodeJsonElement()
+
+        return when (element) {
+            is JsonPrimitive -> {
+                element.doubleOrNull ?: element.content.toDoubleOrNull()
+            }
+            else -> null
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: Double?) {
+        if (value != null) {
+            encoder.encodeDouble(value)
+        } else {
+            encoder.encodeNull()
+        }
+    }
+}

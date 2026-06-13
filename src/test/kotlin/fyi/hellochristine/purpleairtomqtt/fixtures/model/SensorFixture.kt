@@ -39,6 +39,7 @@ object SensorFixture {
             device = device,
             weatherData = createWeatherData(),
             place = place,
+            vocReading = null,
             airQualityReadings = setOf(createAirQualityReading()),
             polledDeviceInfo = createPolledDeviceInfo()
         )

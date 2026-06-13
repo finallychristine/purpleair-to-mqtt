@@ -139,7 +139,7 @@ class Poller @Inject constructor(
     private fun publish(
         sensor: Sensor,
         log: () -> Any?,
-        messageProvider: Function<SensorWithValue, Mqtt5Publish>,
+        messageProvider: Function<SensorWithValue<out Number>, Mqtt5Publish>,
     ): Flowable<Mqtt5PublishResult> {
         val haSensors = Mapper.toHomeAssistantSensors(sensor)
         val clients = sensor.device.brokerIds.map{ mqttServer ->

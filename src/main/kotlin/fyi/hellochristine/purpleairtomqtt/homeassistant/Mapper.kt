@@ -1,7 +1,9 @@
 package fyi.hellochristine.purpleairtomqtt.homeassistant
 
+import fyi.hellochristine.purpleairtomqtt.model.AirQuality
+
 object Mapper {
-    fun toHomeAssistantSensors(sensor: fyi.hellochristine.purpleairtomqtt.model.Sensor): List<SensorWithValue> {
+    fun toHomeAssistantSensors(sensor: fyi.hellochristine.purpleairtomqtt.model.Sensor): List<SensorWithValue<out Number>> {
         val temp = sensor.weatherData?.let {
             getSensorWithValue(
                 sensor = sensor,
@@ -57,42 +59,63 @@ object Mapper {
             )
         }
 
+        fun <T: Any>groupIntoChannels(getter: (AirQuality) -> T?): List<T>? {
+            val list = sensor.airQualityReadings.mapNotNull(getter)
+            if (list.isEmpty()) {
+                return null
+            }
+            return list
+        }
 
-        // Note: could be nice to distinguish between sensor A & B
-        val airReading = sensor.airQualityReadings.firstOrNull()
+        fun <T: Any, K: Any>associateIntoChannels(getter: (AirQuality) -> Collection<T>?, by: (T) -> K): Map<K, List<T>>? {
+            val list = sensor.airQualityReadings.mapNotNull(getter)
+            if (list.isEmpty()) {
+                return null
+            }
 
-        val aqi = airReading?.let {
+            val associated = list.map { it.groupBy(by) }
+            val allKeys = associated.flatMap { it.keys }.distinct()
+
+            return allKeys
+                .groupBy({it}, {key -> associated.map { a -> a[key] ?: emptyList() } })
+                .mapValues { it.value.flatten().flatten() }
+        }
+
+
+        val aqi = groupIntoChannels{ it.pm25Aqi }?.let { readings ->
             getSensorWithValue(
                 sensor = sensor,
                 id = "aqi",
                 name = "AQI",
-                value = airReading.pm25Aqi,
+                value = readings.average(),
                 deviceClass = DeviceClass.AQI,
                 unitOfMeasurement = null,
             )
         }
 
-        val counts = airReading?.particulateCounts?.map { (diameter,count) ->
-            getSensorWithValue(
-                sensor = sensor,
-                id = diameter.key() + "_count",
-                name = diameter.description + " Count",
-                value = count,
-                deviceClass = null,
-                unitOfMeasurement = UnitOfMeasurement.PARTICLE_DECILITER_COUNT,
-                enabledByDefault = false,
-            )
-        } ?: emptyList()
-
-        val pmReadings = airReading?.pmReadings
-            ?.filter { it.methodology == sensor.place.methodology }
-            ?.map { reading ->
+        val counts = associateIntoChannels({ it.particulateCounts.entries }, { it.key })
+            ?.map { (diameter, entries) ->
                 getSensorWithValue(
                     sensor = sensor,
-                    id = reading.size.key(),
-                    name = reading.size.description,
-                    value = reading.amount,
-                    deviceClass = reading.size.haDeviceClass,
+                    id = diameter.key() + "_count",
+                    name = diameter.description + " Count",
+                    value = entries.map { it.value }.average(),
+                    deviceClass = null,
+                    unitOfMeasurement = UnitOfMeasurement.PARTICLE_DECILITER_COUNT,
+                    enabledByDefault = false,
+                )
+            } ?: emptyList()
+
+        val pmReadings = associateIntoChannels(
+                getter = { aq -> aq.pmReadings.filter { reading -> reading.methodology == sensor.place.methodology } },
+                by = { it.size })
+            ?.map { (size, readings) ->
+                getSensorWithValue(
+                    sensor = sensor,
+                    id = size.key(),
+                    name = size.description,
+                    value = readings.map { it.amount }.average(),
+                    deviceClass = size.haDeviceClass,
                     unitOfMeasurement = UnitOfMeasurement.UG_M3,
                 )
             } ?: emptyList()
@@ -100,16 +123,16 @@ object Mapper {
         return listOfNotNull(temp, humidity, pressure, dewpoint, aqi, voc) + counts + pmReadings
     }
 
-    private fun getSensorWithValue(
+    private fun <T: Number>getSensorWithValue(
         id: String,
         name: String,
-        value: Any,
+        value: T,
         sensor: fyi.hellochristine.purpleairtomqtt.model.Sensor,
         deviceClass: DeviceClass?,
         unitOfMeasurement: UnitOfMeasurement?,
         stateClass: StateClass? = StateClass.MEASUREMENT,
         enabledByDefault: Boolean = true,
-    ): SensorWithValue {
+    ): SensorWithValue<T> {
         return SensorWithValue(
             value = value,
             haDiscoveryTopic = getDiscoveryTopic(sensor, id),

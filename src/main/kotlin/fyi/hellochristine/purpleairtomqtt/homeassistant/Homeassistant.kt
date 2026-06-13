@@ -58,8 +58,8 @@ data class Device(
     @SerialName("connections") val connections: List<List<String>>,
 )
 
-data class SensorWithValue(
-    val value: Any,
+data class SensorWithValue<T: Number>(
+    val value: T,
     val sensor: Sensor,
     val haDiscoveryTopic: String,
 )

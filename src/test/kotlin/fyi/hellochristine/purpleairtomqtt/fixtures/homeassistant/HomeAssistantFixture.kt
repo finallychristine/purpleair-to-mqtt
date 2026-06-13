@@ -56,8 +56,8 @@ object HomeAssistantFixture {
         deviceId: String = DeviceFixture.id,
         sensor: Sensor = createSensor(sensorId = sensorId),
         haDiscoveryTopic: String = "homeassistant/sensor/purpleairtomqtt-${deviceId}--${sensorId}/config",
-        value: Any = sensorValue
-    ): SensorWithValue {
+        value: Number = sensorValue
+    ): SensorWithValue<out Number> {
         return SensorWithValue(
             value = value,
             sensor = sensor,

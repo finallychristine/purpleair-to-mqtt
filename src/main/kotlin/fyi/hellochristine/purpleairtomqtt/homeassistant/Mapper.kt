@@ -1,6 +1,9 @@
 package fyi.hellochristine.purpleairtomqtt.homeassistant
 
 import fyi.hellochristine.purpleairtomqtt.model.AirQuality
+import kotlin.math.pow
+import kotlin.math.round
+import kotlin.math.roundToInt
 
 object Mapper {
     fun toHomeAssistantSensors(sensor: fyi.hellochristine.purpleairtomqtt.model.Sensor): List<SensorWithValue<out Number>> {
@@ -87,7 +90,7 @@ object Mapper {
                 sensor = sensor,
                 id = "aqi",
                 name = "AQI",
-                value = readings.average(),
+                value = readings.average().roundToInt(),
                 deviceClass = DeviceClass.AQI,
                 unitOfMeasurement = null,
             )
@@ -99,7 +102,7 @@ object Mapper {
                     sensor = sensor,
                     id = diameter.key() + "_count",
                     name = diameter.description + " Count",
-                    value = entries.map { it.value }.average(),
+                    value = entries.map { it.value }.average().roundToInt(),
                     deviceClass = null,
                     unitOfMeasurement = UnitOfMeasurement.PARTICLE_DECILITER_COUNT,
                     enabledByDefault = false,
@@ -114,7 +117,7 @@ object Mapper {
                     sensor = sensor,
                     id = size.key(),
                     name = size.description,
-                    value = readings.map { it.amount }.average(),
+                    value = readings.map { it.amount }.average().roundTo(2),
                     deviceClass = size.haDeviceClass,
                     unitOfMeasurement = UnitOfMeasurement.UG_M3,
                 )
@@ -182,4 +185,10 @@ object Mapper {
     ): String {
         return "homeassistant/sensor/purpleairtomqtt-${sensor.device.id}-${id}/config"
     }
+}
+
+fun Double.roundTo(decimals: Int): Double {
+    val factor = 10.0.pow(decimals)
+    return round(this * factor) / factor
+
 }

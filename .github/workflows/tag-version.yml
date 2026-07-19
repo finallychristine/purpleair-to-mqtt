@@ -1,0 +1,42 @@
+name: Tag Version
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - VERSION
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  tag-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Create and push version tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(tr -d '[:space:]' < VERSION)"
+          tag="v${version}"
+
+          if [ -z "$version" ]; then
+            echo "VERSION is empty"
+            exit 1
+          fi
+
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists"
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "$tag"
+          git push origin "$tag"
+          gh workflow run docker-publish.yml --ref "$tag"

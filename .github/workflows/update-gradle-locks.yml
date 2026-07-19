@@ -1,0 +1,53 @@
+name: Update Gradle Dependency Locks
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-gradle-dependency-locks
+  cancel-in-progress: false
+
+jobs:
+  update-locks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-gradle
+
+      - name: Update Gradle dependency locks
+        run: ./gradlew dependencies --update-locks '*:*' --refresh-dependencies
+
+      - name: Build with updated dependency locks
+        run: ./gradlew build
+
+      - name: Create pull request
+        id: create-pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.DEPENDENCY_UPDATE_TOKEN || github.token }}
+          branch: automation/update-gradle-dependency-locks
+          delete-branch: true
+          commit-message: Update Gradle dependency locks
+          title: Update Gradle dependency locks
+          body: |
+            Weekly Gradle dependency lock refresh.
+
+            Command:
+
+            ```sh
+            ./gradlew dependencies --update-locks '*:*' --refresh-dependencies
+            ```
+
+      - name: Enable auto-merge
+        if: steps.create-pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.DEPENDENCY_UPDATE_TOKEN || github.token }}
+          PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
+        run: gh pr merge --auto --squash --delete-branch "$PR_URL"

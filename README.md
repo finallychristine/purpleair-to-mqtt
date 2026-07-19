@@ -28,15 +28,15 @@ First define a configuration file (e.g. `config.toml`)
 [mqtt.default]
 version = 5
 host = "example.host"
-ssl.enabled = true            # optional, defaults to true
-port = 8883                   # optional, defaults to 8883 if ssl.enabled, otherwise 1833
-username = "username"         # optional
+ssl.enabled = true           # optional, defaults to true
+port = 8883                  # optional, defaults to 8883 if ssl.enabled, otherwise 1833
+username = "username"        # optional
 password.value = "password"  # optional
 
 [devices.default]
 host = "http://192.168.1.142"
-servers = ["default"]          # optional, defaults to ["default"]. Multiple servers are supported
-pollRateSeconds = 60           # optional, defaults to 60
+servers = ["default"]         # optional, defaults to ["default"]. Multiple servers are supported
+pollRateSeconds = 60          # optional, defaults to 60
 
 [devices.another]
 # ... define as many devices as you like

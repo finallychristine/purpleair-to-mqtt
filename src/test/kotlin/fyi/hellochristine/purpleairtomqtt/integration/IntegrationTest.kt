@@ -18,7 +18,6 @@ import nl.altindag.ssl.util.HostnameVerifierUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.mockserver.client.MockServerClient
@@ -41,12 +40,11 @@ import kotlin.io.path.writeText
 
 @Tag("integration")
 @Testcontainers
-@Disabled("SSL integration not working at the moment")
 class IntegrationTest {
 
     // https://java.testcontainers.org/modules/hivemq
     @Container
-    val mqttBroker = HiveMQContainer(DockerImageName.parse("hivemq/hivemq-ce").withTag("2025.5"))
+    val mqttBroker = HiveMQContainer(DockerImageName.parse("hivemq/hivemq-ce").withTag("2026.5"))
         .withLogLevel(Level.DEBUG)
         .withHiveMQConfig(MountableFile.forClasspathResource("integration/hivemq-server.xml"))
         .withFileInHomeFolder(
@@ -59,7 +57,7 @@ class IntegrationTest {
         )
 
     @Container
-    val mockServer = MockServerContainer(DockerImageName.parse("mockserver/mockserver").withTag("5.15.0"))
+    val mockServer = MockServerContainer(DockerImageName.parse("mockserver/mockserver").withTag("7.4.0"))
 
     lateinit var mockServerClient: MockServerClient
     lateinit var component: AppComponent

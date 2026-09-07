@@ -1,0 +1,27 @@
+name: Pull Request
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v6
+    - uses: ./.github/actions/setup-gradle
+    - uses: ./.github/actions/gradle-build-test
+
+  dependency-submission:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v6
+    - uses: ./.github/actions/setup-gradle
+    - name: Generate and submit dependency graph
+      uses: gradle/actions/dependency-submission@v6

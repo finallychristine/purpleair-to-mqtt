@@ -2,6 +2,7 @@ package fyi.hellochristine.purpleairtomqtt.purpleairapi
 
 import fyi.hellochristine.purpleairtomqtt.model.Hardware
 import fyi.hellochristine.purpleairtomqtt.model.RequiredHardware
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -125,6 +126,7 @@ data class DeviceResponse(
     val gas_680: Double? = null,
 )
 
+@OptIn(ExperimentalSerializationApi::class)
 class DropNotNumberSerializer  : KSerializer<Double?> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("DropNotNumberSerializer", PrimitiveKind.DOUBLE);

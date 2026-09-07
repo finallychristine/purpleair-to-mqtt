@@ -57,7 +57,8 @@ class IntegrationTest {
         )
 
     @Container
-    val mockServer = MockServerContainer(DockerImageName.parse("mockserver/mockserver").withTag("7.4.0"))
+    val mockServer = MockServerContainer(DockerImageName.parse("mockserver/mockserver")
+        .withTag("mockserver-${MockServerClient::class.java.`package`.implementationVersion}"))
 
     lateinit var mockServerClient: MockServerClient
     lateinit var component: AppComponent

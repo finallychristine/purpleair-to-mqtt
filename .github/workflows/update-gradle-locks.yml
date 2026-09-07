@@ -21,11 +21,10 @@ jobs:
 
       - uses: ./.github/actions/setup-gradle
 
-      - name: Update Gradle dependency locks
+      - name: Update versions
         run: ./gradlew dependencies --update-locks '*:*' --refresh-dependencies
 
-      - name: Build with updated dependency locks
-        run: ./gradlew build
+      - uses: ./.github/actions/gradle-build-test
 
       - name: Create pull request
         id: create-pr

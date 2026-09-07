@@ -22,10 +22,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - uses: ./.github/actions/setup-gradle
-    - name: Build with Gradle Wrapper
-      run: ./gradlew build
-    - name: Gradle Test
-      run: ./gradlew test
+    - uses: ./.github/actions/gradle-build-test
 
   dependency-submission:
     runs-on: ubuntu-latest

@@ -1,0 +1,34 @@
+name: Gradle Build and Test
+description: Build and test the project, then upload Gradle reports
+
+inputs:
+  artifact-name:
+    description: Name of the uploaded reports artifact
+    required: false
+    default: gradle-build-reports
+  retention-days:
+    description: Number of days to retain the uploaded reports
+    required: false
+    default: "14"
+
+runs:
+  using: composite
+  steps:
+    - name: Build
+      shell: bash
+      run: ./gradlew build -x test
+
+    - name: Test
+      shell: bash
+      run: ./gradlew test
+
+    - name: Upload Gradle reports
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          build/reports/
+          build/test-results/
+        if-no-files-found: warn
+        retention-days: ${{ inputs.retention-days }}

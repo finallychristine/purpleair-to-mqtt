@@ -1,0 +1,14 @@
+# Only send the files needed to build the production distribution.
+**
+!gradlew
+!gradle/
+!gradle/**
+!build.gradle.kts
+!settings.gradle.kts
+!gradle.properties
+!gradle.lockfile
+!settings-gradle.lockfile
+!VERSION
+!src/
+!src/main/
+!src/main/**

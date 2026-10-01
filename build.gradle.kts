@@ -63,6 +63,26 @@ dependencyLocking {
     lockAllConfigurations()
 }
 
+// Resolve production artifacts before copying sources into the Docker build.
+// Unlike the dependencies report, this downloads the JARs needed for compilation and packaging.
+tasks.register("resolveDockerDependencies") {
+    group = "build setup"
+    description = "Downloads production dependencies for the Docker build cache."
+    doLast {
+        listOf(
+            "compileClasspath",
+            "runtimeClasspath",
+            "kspKotlinProcessorClasspath",
+            "kotlinCompilerClasspath",
+            "kotlinCompilerPluginClasspathMain",
+            "kspPluginClasspath",
+            "kspPluginClasspathNonEmbeddable",
+        ).forEach {
+            configurations.getByName(it).resolve()
+        }
+    }
+}
+
 // Ensure fuzzy matched gradle versions don't include beta versions
 val prereleaseVersion = Regex(""".*(alpha|beta|rc|cr|m|dev|snapshot|eap|preview)[\.\-\d]*$""", RegexOption.IGNORE_CASE)
 val ignoredCandidates = setOf<String>("org.jetbrains.kotlin:kotlin-stdlib")

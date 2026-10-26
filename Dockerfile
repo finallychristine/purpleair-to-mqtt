@@ -1,4 +1,4 @@
-FROM eclipse-temurin:26-jdk-alpine AS build
+FROM eclipse-temurin:27-jdk-alpine AS build
 
 WORKDIR /build
 COPY --chmod=0755 gradlew ./
@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/root/.gradle/caches/build-cache-1,sharing=locked 
     cp -R build/install/purpleair-to-mqtt/bin /opt/app/ && \
     cp VERSION /opt/app/
 
-FROM eclipse-temurin:26-jre-alpine
+FROM eclipse-temurin:27-jre-alpine
 WORKDIR /app
 # Dependencies change less often than the application, so keep them in their own layer.
 COPY --from=build /build/build/install/purpleair-to-mqtt/lib/ /app/lib/

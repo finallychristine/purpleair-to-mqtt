@@ -3,21 +3,23 @@ description: 'Set up JDK, and configure Gradle'
 
 inputs:
   java-version:
-    description: 'JDK version to install'
+    description: 'JDK version override (defaults to versions.jdk in gradle/libs.versions.toml)'
     required: false
-    default: '26'
-  java-distribution:
-    description: 'JDK distribution'
-    required: false
-    default: 'temurin'
 
 runs:
   using: 'composite'
   steps:
+    - name: Read JDK version from version catalog
+      if: ${{ inputs.java-version == '' }}
+      id: jdk-version
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+      run: python3 "$ACTION_PATH/read-jdk-version.py" >> "$GITHUB_OUTPUT"
     - name: Set up JDK
       uses: actions/setup-java@v6
       with:
-        java-version: ${{ inputs.java-version }}
-        distribution: ${{ inputs.java-distribution }}
+        java-version: ${{ inputs.java-version || steps.jdk-version.outputs.version }}
+        distribution: 'temurin'
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v6

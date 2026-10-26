@@ -12,7 +12,7 @@ jobs:
     permissions:
       contents: read
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/setup-gradle
     - uses: ./.github/actions/gradle-build-test
 
@@ -21,7 +21,7 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: ./.github/actions/setup-gradle
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@v6

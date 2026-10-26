@@ -11,13 +11,13 @@ permissions:
 
 concurrency:
   group: update-gradle-dependency-locks
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   update-locks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ./.github/actions/setup-gradle
 
@@ -28,7 +28,7 @@ jobs:
 
       - name: Create pull request
         id: create-pr
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.DEPENDENCY_UPDATE_TOKEN || github.token }}
           branch: automation/update-gradle-dependency-locks
